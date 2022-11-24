@@ -18,7 +18,7 @@ auto cpu_info() -> std::string {
 
     if (!(file.is_open())) return { };
 
-    for (std::string line; (std::getline(file, line));) {
+    for (std::string line; (std::getline(file, line)); ) {
         if (line.find(model_name) != std::string::npos) {
             const std::size_t start_pos = line.find(model_name);
             std::string temp = line.substr(start_pos + 0xD);
