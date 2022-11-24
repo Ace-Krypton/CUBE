@@ -12,13 +12,13 @@
  * 7. RAM percentage
  * 8. CPU information */
 
-auto get_cpu() -> std::string {
+auto cpu_info() -> std::string {
     std::string model_name { "model name" }, cpu_info { };
-    std::ifstream file("/proc/cpuinfo");
+    std::ifstream file { "/proc/cpuinfo" };
 
     if (!(file.is_open())) return { };
 
-    for (std::string line; (std::getline(file,line));) {
+    for (std::string line; (std::getline(file, line));) {
         if (line.find(model_name) != std::string::npos) {
             const std::size_t start_pos = line.find(model_name);
             std::string temp = line.substr(start_pos + 0xD);
@@ -26,13 +26,32 @@ auto get_cpu() -> std::string {
             cpu_info = temp.substr(0x0, stop_pos);
         }
     }
+    file.close();
     return cpu_info;
+}
+
+auto distro_display() -> std::string {
+    std::string pretty_name { "PRETTY_NAME=\"" }, name { };
+    std::ifstream file { "/etc/os-release" };
+
+    if (!(file.is_open())) return { };
+
+    while ((std::getline(file, name))) {
+        if (name.find(pretty_name) != std::string::npos) break;
+    }
+    file.close();
+    name = name.substr(pretty_name.length(),name.length() - (pretty_name.length() + 0x1));
+    return (name.empty()) ? std::string() : name;
 }
 
 auto main(int argc, const char* argv[]) -> int {
     for (std::size_t i = 0x1; i < argc; i++) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
-            std::cout << get_cpu() << std::endl;
+            std::cout << cpu_info() << std::endl;
+        }
+
+        else if (std::experimental::string_view(argv[i]) == "--distro") {
+            std::cout << distro_display() << std::endl;
         }
 
         else {
