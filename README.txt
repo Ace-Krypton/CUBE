@@ -1,1 +1,1 @@
-
+CUBE is a command-line system information tool written in c++ 20. CUBE displays information about your operating system, software and hardware. Project's main goal is to have the most efficient system information tool available. I will add functionalities allowing user to add custom ASCII file, image and etc. Also I will add multi OS support in the near future. Project is still in development :)
