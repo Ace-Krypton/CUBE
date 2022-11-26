@@ -1,9 +1,9 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
+#include <fstream>
 #include <unistd.h>
-#include <experimental/string_view>
 #include <filesystem>
+#include <experimental/string_view>
 
 /* TODO List
  * 1. Distro Display
@@ -15,12 +15,12 @@
  * 7. RAM percentage
  * 8. CPU information */
 
-uint32_t register_output[0xA];
+std::uint32_t register_output[0xA];
 static std::string base_path = "/sys/class/power_supply/";
 
-auto brand_string(uint32_t eax_values) -> void {
+auto brand_string(std::uint32_t eax_values) -> void {
     switch (eax_values) {
-        case 0x1 : __asm__("mov $0x80000002, %eax\n\t"); break;
+        case 0x1: __asm__("mov $0x80000002, %eax\n\t"); break;
         case 0x2: __asm__("mov $0x80000003, %eax\n\t"); break;
         case 0x3: __asm__("mov $0x80000004, %eax\n\t"); break;
         default: std::cout << "Something went wrong" << std::endl; break;
@@ -41,20 +41,20 @@ auto get_cpu_id() -> void {
     __asm__("xor %ecx, %ecx\n\t");
     __asm__("xor %edx, %edx\n\t");
 
-    for (uint32_t values { 0x1 }; values <= 0x3; values++) brand_string(values);
+    for (std::uint32_t values { 0x1 }; values <= 0x3; values++) brand_string(values);
 }
 
-auto get_total_size() -> int64_t {
+auto get_total_size() -> std::int64_t {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGESIZE);
     return ((pages > 0x0) && (page_size > 0x0)) ? (pages * page_size) / 0x3E8 : 0x1;
 }
 
 auto get_battery() -> std::vector<std::string> {
-    uint16_t _id { 0x0 };
-    std::vector<std::string> vendors { };
     std::string vendor { };
-    std::vector<uint16_t> batteries;
+    std::uint16_t _id { 0x0 };
+    std::vector<std::string> vendors { };
+    std::vector<std::uint16_t> batteries { };
 
     while (std::filesystem::exists(std::filesystem::path(base_path + "BAT" + std::to_string(_id)))) {
         batteries.emplace_back(_id++);
