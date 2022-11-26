@@ -41,25 +41,27 @@ auto get_total_size() -> int64_t {
     return ((pages > 0x0) && (page_size > 0x0)) ? (pages * page_size) / 0x3E8 : 0x1;
 }
 
-auto get_battery() -> std::string {
-    u_int8_t _id { 0x0 };
+auto get_battery() -> std::vector<std::string> {
+    uint16_t _id { 0x0 };
+    std::vector<std::string> vendors { };
     std::string vendor { };
-    std::vector<u_int8_t> batteries;
+    std::vector<uint16_t> batteries;
 
     while (std::filesystem::exists(std::filesystem::path(base_path + "BAT" + std::to_string(_id)))) {
         batteries.emplace_back(_id++);
     }
 
-    if (_id < 0x0) std::cout << "<unknown>" << std::endl;
-    std::ifstream vendor_file(base_path + "BAT" + std::to_string(_id) + "/" + "manufacturer");
+    for (auto const &battery : batteries) {
+        if (battery < 0x0) std::cout << "<unknown>" << std::endl;
+        std::ifstream vendor_file(base_path + "BAT" + std::to_string(battery) + "/" + "manufacturer");
+        if (!(vendor_file.is_open())) return { };
+        while ((std::getline(vendor_file, vendor))) vendors.emplace_back(vendor);
+    }
 
-    if (!(vendor_file.is_open())) return { };
-
-    while ((std::getline(vendor_file, vendor))) return vendor;
-    return { };
+    return vendors;
 }
 
-auto get_cpu_id()-> void {
+auto get_cpu_id() -> void {
     __asm__("xor %eax, %eax\n\t");
     __asm__("xor %ebx, %ebx\n\t");
     __asm__("xor %ecx, %ecx\n\t");
@@ -104,7 +106,6 @@ auto main(int argc, const char* argv[]) -> int {
     std::cout << std::endl;
     std::cout << get_total_size();
     std::cout << std::endl;
-    std::cout << get_battery() << std::endl;
 
     for (std::size_t i { 0x1 }; i < argc; i++) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
@@ -113,6 +114,10 @@ auto main(int argc, const char* argv[]) -> int {
 
         else if (std::experimental::string_view(argv[i]) == "--distro") {
             std::cout << distro_display() << std::endl;
+        }
+
+        else if (std::experimental::string_view(argv[i]) == "--battery-manufacturer") {
+            for (auto const &battery : get_battery()) std::cout << battery << std::endl;
         }
 
         else {
