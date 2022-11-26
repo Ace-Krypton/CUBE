@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 #include <experimental/string_view>
 
 /* TODO List
@@ -29,6 +30,13 @@ auto brand_string(uint32_t eax_values) -> void {
     __asm__("mov %%edx, %0\n\t":"=r" (register_output[0x3]));
 
     std::cout << std::string((const char *)&register_output[0x0]);
+}
+
+auto get_total_size() -> int64_t {
+    long pages = sysconf(_SC_PHYS_PAGES);
+    long page_size = sysconf(_SC_PAGESIZE);
+    if ((pages > 0x0) && (page_size > 0x0)) return (pages * page_size) / 1000;
+    return 0x1;
 }
 
 auto get_cpu_id()-> void {
@@ -73,6 +81,8 @@ auto distro_display() -> std::string {
 
 auto main(int argc, const char* argv[]) -> int {
     get_cpu_id();
+    std::cout << std::endl;
+    std::cout << get_total_size();
 
     for (std::size_t i = 0x1; i < argc; i++) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
