@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <unistd.h>
 #include <experimental/string_view>
+#include <filesystem>
 
 /* TODO List
  * 1. Distro Display
@@ -14,6 +16,7 @@
  * 8. CPU information */
 
 uint32_t register_output[0xA];
+static std::string base_path = "/sys/class/power_supply/";
 
 auto brand_string(uint32_t eax_values) -> void {
     switch (eax_values) {
@@ -36,6 +39,24 @@ auto get_total_size() -> int64_t {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGESIZE);
     return ((pages > 0x0) && (page_size > 0x0)) ? (pages * page_size) / 0x3E8 : 0x1;
+}
+
+auto get_battery() -> std::string {
+    u_int8_t _id { 0x0 };
+    std::string vendor { };
+    std::vector<u_int8_t> batteries;
+
+    while (std::filesystem::exists(std::filesystem::path(base_path + "BAT" + std::to_string(_id)))) {
+        batteries.emplace_back(_id++);
+    }
+
+    if (_id < 0x0) std::cout << "<unknown>" << std::endl;
+    std::ifstream vendor_file(base_path + "BAT" + std::to_string(_id) + "/" + "manufacturer");
+
+    if (!(vendor_file.is_open())) return { };
+
+    while ((std::getline(vendor_file, vendor))) return vendor;
+    return { };
 }
 
 auto get_cpu_id()-> void {
@@ -74,7 +95,7 @@ auto distro_display() -> std::string {
     while ((std::getline(file, name))) if (name.find(pretty_name) != std::string::npos) break;
     file.close();
 
-    name = name.substr(pretty_name.length(),name.length() - (pretty_name.length() + 0x1));
+    name = name.substr(pretty_name.length(), name.length() - (pretty_name.length() + 0x1));
     return (name.empty()) ? std::string() : name;
 }
 
@@ -82,8 +103,10 @@ auto main(int argc, const char* argv[]) -> int {
     get_cpu_id();
     std::cout << std::endl;
     std::cout << get_total_size();
+    std::cout << std::endl;
+    std::cout << get_battery() << std::endl;
 
-    for (std::size_t i = 0x1; i < argc; i++) {
+    for (std::size_t i { 0x1 }; i < argc; i++) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
             std::cout << cpu_info() << std::endl;
         }
