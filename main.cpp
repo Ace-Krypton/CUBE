@@ -35,8 +35,7 @@ auto brand_string(uint32_t eax_values) -> void {
 auto get_total_size() -> int64_t {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGESIZE);
-    if ((pages > 0x0) && (page_size > 0x0)) return (pages * page_size) / 1000;
-    return 0x1;
+    return ((pages > 0x0) && (page_size > 0x0)) ? (pages * page_size) / 0x3E8 : 0x1;
 }
 
 auto get_cpu_id()-> void {
@@ -45,7 +44,7 @@ auto get_cpu_id()-> void {
     __asm__("xor %ecx, %ecx\n\t");
     __asm__("xor %edx, %edx\n\t");
 
-    for (uint32_t i = 0x1; i <= 0x3; i++) brand_string(i);
+    for (uint32_t values { 0x1 }; values <= 0x3; values++) brand_string(values);
 }
 
 auto cpu_info() -> std::string {
