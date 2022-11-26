@@ -1,1 +1,1 @@
-Neofetch and others, suck my cock
+neofetch and others, suck my cock
