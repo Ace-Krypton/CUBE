@@ -14,15 +14,6 @@
 
 int register_output[0xA];
 
-auto eax_1() -> void {
-    __asm__("mov $0x1 , %eax\n\t");
-    __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (register_output[0x0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (register_output[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (register_output[0x2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (register_output[0x3]));
-}
-
 auto brand_string(int eax_values) -> void {
     switch (eax_values) {
         case 0x1 : __asm__("mov $0x80000002 , %eax\n\t"); break;
@@ -36,7 +27,8 @@ auto brand_string(int eax_values) -> void {
     __asm__("mov %%ebx, %0\n\t":"=r" (register_output[0x1]));
     __asm__("mov %%ecx, %0\n\t":"=r" (register_output[0x2]));
     __asm__("mov %%edx, %0\n\t":"=r" (register_output[0x3]));
-    printf("%s", &register_output[0x0]);
+
+    std::cout << std::string((const char *)&register_output[0x0]);
 }
 
 auto get_cpu_id()-> void {
