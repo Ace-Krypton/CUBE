@@ -12,22 +12,22 @@
  * 7. RAM percentage
  * 8. CPU information */
 
-uint32_t a[10];
+int register_output[0xA];
 
 auto brand_string(int eax_values) -> void {
     switch (eax_values) {
-        case 1 : __asm__("mov $0x80000002 , %eax\n\t"); break;
-        case 2: __asm__("mov $0x80000003 , %eax\n\t"); break;
-        case 3: __asm__("mov $0x80000004 , %eax\n\t"); break;
+        case 0x1 : __asm__("mov $0x80000002 , %eax\n\t"); break;
+        case 0x2: __asm__("mov $0x80000003 , %eax\n\t"); break;
+        case 0x3: __asm__("mov $0x80000004 , %eax\n\t"); break;
         default: std::cout << "Something went wrong" << std::endl; break;
     }
 
     __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (a[0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (a[1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (a[2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (a[3]));
-    printf("%s", &a[0]);
+    __asm__("mov %%eax, %0\n\t":"=r" (register_output[0x0]));
+    __asm__("mov %%ebx, %0\n\t":"=r" (register_output[0x1]));
+    __asm__("mov %%ecx, %0\n\t":"=r" (register_output[0x2]));
+    __asm__("mov %%edx, %0\n\t":"=r" (register_output[0x3]));
+    printf("%s", &register_output[0x0]);
 }
 
 auto get_cpu_id()-> void {
@@ -36,10 +36,7 @@ auto get_cpu_id()-> void {
     __asm__("xor %ecx , %ecx\n\t");
     __asm__("xor %edx , %edx\n\t");
 
-    brand_string(1);
-    brand_string(2);
-    brand_string(3);
-    printf("\n");
+    for (int i = 0x1; i <= 0x3; i++) brand_string(i);
 }
 
 auto cpu_info() -> std::string {
@@ -74,9 +71,10 @@ auto distro_display() -> std::string {
 }
 
 auto main(int argc, const char* argv[]) -> int {
+    get_cpu_id();
+
     for (std::size_t i = 0x1; i < argc; i++) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
-            get_cpu_id();
             std::cout << cpu_info() << std::endl;
         }
 
