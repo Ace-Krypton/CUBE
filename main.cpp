@@ -12,13 +12,13 @@
  * 7. RAM percentage
  * 8. CPU information */
 
-int register_output[0xA];
+uint32_t register_output[0xA];
 
-auto brand_string(int eax_values) -> void {
+auto brand_string(uint32_t eax_values) -> void {
     switch (eax_values) {
-        case 0x1 : __asm__("mov $0x80000002 , %eax\n\t"); break;
-        case 0x2: __asm__("mov $0x80000003 , %eax\n\t"); break;
-        case 0x3: __asm__("mov $0x80000004 , %eax\n\t"); break;
+        case 0x1 : __asm__("mov $0x80000002, %eax\n\t"); break;
+        case 0x2: __asm__("mov $0x80000003, %eax\n\t"); break;
+        case 0x3: __asm__("mov $0x80000004, %eax\n\t"); break;
         default: std::cout << "Something went wrong" << std::endl; break;
     }
 
@@ -32,12 +32,12 @@ auto brand_string(int eax_values) -> void {
 }
 
 auto get_cpu_id()-> void {
-    __asm__("xor %eax , %eax\n\t");
-    __asm__("xor %ebx , %ebx\n\t");
-    __asm__("xor %ecx , %ecx\n\t");
-    __asm__("xor %edx , %edx\n\t");
+    __asm__("xor %eax, %eax\n\t");
+    __asm__("xor %ebx, %ebx\n\t");
+    __asm__("xor %ecx, %ecx\n\t");
+    __asm__("xor %edx, %edx\n\t");
 
-    for (int i = 0x1; i <= 0x3; i++) brand_string(i);
+    for (uint32_t i = 0x1; i <= 0x3; i++) brand_string(i);
 }
 
 auto cpu_info() -> std::string {
