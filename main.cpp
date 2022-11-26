@@ -35,6 +35,15 @@ auto brand_string(uint32_t eax_values) -> void {
     std::cout << std::string((const char *)&register_output[0x0]);
 }
 
+auto get_cpu_id() -> void {
+    __asm__("xor %eax, %eax\n\t");
+    __asm__("xor %ebx, %ebx\n\t");
+    __asm__("xor %ecx, %ecx\n\t");
+    __asm__("xor %edx, %edx\n\t");
+
+    for (uint32_t values { 0x1 }; values <= 0x3; values++) brand_string(values);
+}
+
 auto get_total_size() -> int64_t {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGESIZE);
@@ -59,15 +68,6 @@ auto get_battery() -> std::vector<std::string> {
     }
 
     return vendors;
-}
-
-auto get_cpu_id() -> void {
-    __asm__("xor %eax, %eax\n\t");
-    __asm__("xor %ebx, %ebx\n\t");
-    __asm__("xor %ecx, %ecx\n\t");
-    __asm__("xor %edx, %edx\n\t");
-
-    for (uint32_t values { 0x1 }; values <= 0x3; values++) brand_string(values);
 }
 
 auto cpu_info() -> std::string {
