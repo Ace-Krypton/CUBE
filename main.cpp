@@ -53,7 +53,7 @@ auto physmem_total() -> std::int64_t {
 auto physmem_available() -> std::int64_t {
     long pages = sysconf (_SC_AVPHYS_PAGES);
     long pagesize = sysconf (_SC_PAGESIZE);
-    return (0 <= pages && 0 <= pagesize) ? (pages * pagesize) / 0x3E8 : 0x1;
+    return (0x0 <= pages && 0x0 <= pagesize) ? (pages * pagesize) / 0x3E8 : 0x1;
 }
 
 auto get_battery() -> std::vector<std::string> {
