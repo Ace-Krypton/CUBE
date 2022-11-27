@@ -44,10 +44,16 @@ auto get_cpu_id() -> void {
     for (std::uint32_t values { 0x1 }; values <= 0x3; values++) brand_string(values);
 }
 
-auto get_total_size() -> std::int64_t {
+auto physmem_total() -> std::int64_t {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGESIZE);
     return ((pages > 0x0) && (page_size > 0x0)) ? (pages * page_size) / 0x3E8 : 0x1;
+}
+
+auto physmem_available() -> std::int64_t {
+    long pages = sysconf (_SC_AVPHYS_PAGES);
+    long pagesize = sysconf (_SC_PAGESIZE);
+    return (0 <= pages && 0 <= pagesize) ? (pages * pagesize) / 0x3E8 : 0x1;
 }
 
 auto get_battery() -> std::vector<std::string> {
@@ -104,8 +110,8 @@ auto distro_display() -> std::string {
 auto main(int argc, const char* argv[]) -> int {
     get_cpu_id();
     std::cout << std::endl;
-    std::cout << get_total_size();
-    std::cout << std::endl;
+    std::cout << physmem_total() << std::endl;
+    std::cout << physmem_available() << std::endl;
 
     for (std::size_t i { 0x1 }; i < argc; i++) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
