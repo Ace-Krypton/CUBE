@@ -15,6 +15,9 @@
  * 7. RAM percentage
  * 8. CPU information */
 
+#define CPU_INFO "/proc/cpuinfo"
+#define RELEASE "/etc/os-release"
+
 std::uint32_t register_output[0xA];
 static std::string base_path = "/sys/class/power_supply/";
 
@@ -78,7 +81,7 @@ auto get_battery() -> std::vector<std::string> {
 
 auto cpu_info() -> std::string {
     std::string model_name { "model name" }, cpu_info { };
-    std::ifstream file { "/proc/cpuinfo" };
+    std::ifstream file { CPU_INFO };
 
     if (!(file.is_open())) return { };
 
@@ -96,7 +99,7 @@ auto cpu_info() -> std::string {
 
 auto distro_display() -> std::string {
     std::string pretty_name { "PRETTY_NAME=\"" }, name { };
-    std::ifstream file { "/etc/os-release" };
+    std::ifstream file { RELEASE };
 
     if (!(file.is_open())) return { };
 
