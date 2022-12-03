@@ -1,7 +1,10 @@
 #include <iostream>
+
 #include "os-check.hpp"
 
 #ifdef UNIX
+#include <fstream>
+
 #include "cpu.hpp"
 #endif
 
@@ -33,7 +36,7 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::register_output[0x3]));
 
     std::cout << std::string{ (const char *)&cpu::register_output[0x0] };
-#else
+#elif defined(UNIX)
     std::string model_name { "model name" }, cpu_info { };
     std::ifstream file { CPU_INFO };
 

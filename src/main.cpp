@@ -17,7 +17,6 @@
  * 7. RAM percentage
  * 8. CPU information */
 
-#define CPU_INFO "/proc/cpuinfo"
 #define RELEASE "/etc/os-release"
 
 static std::string base_path = "/sys/class/power_supply/";
@@ -68,6 +67,8 @@ auto distro_display() -> std::string {
 }
 
 auto main(int argc, const char* argv[]) -> int {
+    cpu::vendor_id();
+    std::cout << std::endl;
     cpu::get_cpu_id();
     std::cout << std::endl;
     std::cout << physmem_total() << std::endl;

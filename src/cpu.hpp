@@ -1,5 +1,7 @@
 #pragma once
 
+#define CPU_INFO "/proc/cpuinfo"
+
 class cpu {
 public:
     static inline std::uint32_t vendor_output[0x3];
