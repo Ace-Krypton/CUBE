@@ -8,13 +8,29 @@
 #define CUBE_CPU_HPP
 #define CPU_INFO "/proc/cpuinfo"
 
+struct instruction_set {
+    static inline bool has_fpu = false;
+    static inline bool has_mmx = false;
+    static inline bool has_sse = false;
+    static inline bool has_sse2 = false;
+    static inline bool has_sse3 = false;
+    static inline bool has_ssse3 = false;
+    static inline bool has_sse4_1 = false;
+    static inline bool has_sse4_2 = false;
+    static inline bool has_pclmulqdq = false;
+    static inline bool has_avx = false;
+    static inline bool has_f16c = false;
+};
+
 class cpu {
 public:
+    static inline std::uint32_t detection[0x2];
     static inline std::uint32_t vendor_output[0x3];
     static inline std::uint32_t register_output[0xA];
 
-    static auto get_cpu_id() -> void;
     static auto vendor_id() -> void;
+    static auto get_cpu_id() -> void;
+    static auto instruction_set_checker() -> void;
     static auto model_name(std::uint32_t eax_values) -> void;
 };
 #endif //CUBE_CPU_HPP

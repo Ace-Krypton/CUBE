@@ -11,17 +11,17 @@
 #include <experimental/string_view>
 
 #include "cpu.hpp"
+#include "version.hpp"
 
 /* TODO List
  * 1. Distro Display
  * 2. Linux version
  * 3. Packages
  * 4. Shell version
- * 5. Up Time
+ * 5. Uptime
  * 6. Storage
  * 7. RAM percentage
  * 8. CPU information */
-
 #define RELEASE "/etc/os-release"
 
 static std::string base_path = "/sys/class/power_supply/";
@@ -72,6 +72,8 @@ auto distro_display() -> std::string {
 }
 
 auto main(int argc, const char* argv[]) -> int {
+    cpu::instruction_set_checker();
+    std::cout << cube::version() << std::endl;
     cpu::vendor_id();
     std::cout << std::endl;
     cpu::get_cpu_id();

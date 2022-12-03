@@ -25,6 +25,38 @@ auto cpu::vendor_id() -> void {
 #endif
 }
 
+auto cpu::instruction_set_checker() -> void {
+    __asm__("mov $0x1 , %eax\n\t");
+    __asm__("cpuid\n\t");
+    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::detection[0x0]));
+    __asm__("mov %%edx, %0\n\t":"=r" (cpu::detection[0x1]));
+
+    instruction_set::has_fpu = (cpu::detection[0x1] & (1 << 0)) != 0;
+    instruction_set::has_mmx = (cpu::detection[0x1] & (1 << 23)) != 0;
+    instruction_set::has_sse = (cpu::detection[0x1] & (1 << 25)) != 0;
+    instruction_set::has_sse3 = (cpu::detection[0x0] & (1 << 0)) != 0;
+    instruction_set::has_avx = (cpu::detection[0x0] & (1 << 28)) != 0;
+    instruction_set::has_sse2 = (cpu::detection[0x1] & (1 << 26)) != 0;
+    instruction_set::has_ssse3 = (cpu::detection[0x0] & (1 << 9)) != 0;
+    instruction_set::has_f16c = (cpu::detection[0x0] & (1 << 29)) != 0;
+    instruction_set::has_sse4_1 = (cpu::detection[0x0] & (1 << 19)) != 0;
+    instruction_set::has_sse4_2 = (cpu::detection[0x0] & (1 << 20)) != 0;
+    instruction_set::has_pclmulqdq = (cpu::detection[0x0] & (1 << 1)) != 0;
+
+    std::cout << std::boolalpha;
+    std::cout << "Has FPU -> " << instruction_set::has_fpu << std::endl;
+    std::cout << "Has MMX -> " << instruction_set::has_mmx << std::endl;
+    std::cout << "Has SSE -> " << instruction_set::has_sse << std::endl;
+    std::cout << "Has SSE3 -> " << instruction_set::has_sse3 << std::endl;
+    std::cout << "Has AVX -> " << instruction_set::has_avx << std::endl;
+    std::cout << "Has SSE2 -> " << instruction_set::has_sse2 << std::endl;
+    std::cout << "Has SSSE3 -> " << instruction_set::has_ssse3 << std::endl;
+    std::cout << "Has F16C -> " << instruction_set::has_f16c << std::endl;
+    std::cout << "Has SSE4_1 -> " << instruction_set::has_sse4_1 << std::endl;
+    std::cout << "Has SSE4_2 -> " << instruction_set::has_sse4_2 << std::endl;
+    std::cout << "Has PCLMULQDQ -> " << instruction_set::has_pclmulqdq << std::endl;
+}
+
 auto cpu::model_name(std::uint32_t eax_values) -> void {
 #if defined(X86)
     switch (eax_values) {
@@ -41,6 +73,7 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::register_output[0x3]));
 
     std::cout << std::string{ (const char *)&cpu::register_output[0x0] };
+
 #elif defined(UNIX)
     std::string model_name { "model name" }, cpu_info { };
     std::ifstream file { CPU_INFO };
