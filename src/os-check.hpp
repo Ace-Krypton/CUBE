@@ -1,3 +1,8 @@
+/*
+ * (C)opyright 2022 Ramiz Abbasov <ramizna@code.edu.az>
+ * See LICENSE file for license details
+ */
+
 #pragma once
 
 #if defined(unix) || defined(__unix) || defined(__unix__)
