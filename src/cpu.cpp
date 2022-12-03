@@ -26,22 +26,23 @@ auto cpu::vendor_id() -> void {
 }
 
 auto cpu::instruction_set_checker() -> void {
+#if defined(X86)
     __asm__("mov $0x1 , %eax\n\t");
     __asm__("cpuid\n\t");
     __asm__("mov %%ecx, %0\n\t":"=r" (cpu::detection[0x0]));
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::detection[0x1]));
 
-    instruction_set::has_fpu = (cpu::detection[0x1] & (1 << 0)) != 0;
-    instruction_set::has_mmx = (cpu::detection[0x1] & (1 << 23)) != 0;
-    instruction_set::has_sse = (cpu::detection[0x1] & (1 << 25)) != 0;
-    instruction_set::has_sse3 = (cpu::detection[0x0] & (1 << 0)) != 0;
-    instruction_set::has_avx = (cpu::detection[0x0] & (1 << 28)) != 0;
-    instruction_set::has_sse2 = (cpu::detection[0x1] & (1 << 26)) != 0;
-    instruction_set::has_ssse3 = (cpu::detection[0x0] & (1 << 9)) != 0;
-    instruction_set::has_f16c = (cpu::detection[0x0] & (1 << 29)) != 0;
-    instruction_set::has_sse4_1 = (cpu::detection[0x0] & (1 << 19)) != 0;
-    instruction_set::has_sse4_2 = (cpu::detection[0x0] & (1 << 20)) != 0;
-    instruction_set::has_pclmulqdq = (cpu::detection[0x0] & (1 << 1)) != 0;
+    instruction_set::has_fpu = (cpu::detection[0x1] & (0x1 << 0x0)) != 0x0;
+    instruction_set::has_mmx = (cpu::detection[0x1] & (0x1 << 0x17)) != 0x0;
+    instruction_set::has_sse = (cpu::detection[0x1] & (0x1 << 0x19)) != 0x0;
+    instruction_set::has_sse3 = (cpu::detection[0x0] & (0x1 << 0x0)) != 0x0;
+    instruction_set::has_avx = (cpu::detection[0x0] & (0x1 << 0x1C)) != 0x0;
+    instruction_set::has_sse2 = (cpu::detection[0x1] & (0x1 << 0x1A)) != 0x0;
+    instruction_set::has_ssse3 = (cpu::detection[0x0] & (0x1 << 0x9)) != 0x0;
+    instruction_set::has_f16c = (cpu::detection[0x0] & (0x1 << 0x1D)) != 0x0;
+    instruction_set::has_sse4_1 = (cpu::detection[0x0] & (0x1 << 0x13)) != 0x0;
+    instruction_set::has_sse4_2 = (cpu::detection[0x0] & (0x1 << 0x14)) != 0x0;
+    instruction_set::has_pclmulqdq = (cpu::detection[0x0] & (0x1 << 0x1)) != 0x0;
 
     std::cout << std::boolalpha;
     std::cout << "Has FPU -> " << instruction_set::has_fpu << std::endl;
@@ -55,6 +56,7 @@ auto cpu::instruction_set_checker() -> void {
     std::cout << "Has SSE4_1 -> " << instruction_set::has_sse4_1 << std::endl;
     std::cout << "Has SSE4_2 -> " << instruction_set::has_sse4_2 << std::endl;
     std::cout << "Has PCLMULQDQ -> " << instruction_set::has_pclmulqdq << std::endl;
+#endif
 }
 
 auto cpu::model_name(std::uint32_t eax_values) -> void {

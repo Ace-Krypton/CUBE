@@ -12,14 +12,14 @@ struct instruction_set {
     static inline bool has_fpu = false;
     static inline bool has_mmx = false;
     static inline bool has_sse = false;
+    static inline bool has_avx = false;
     static inline bool has_sse2 = false;
+    static inline bool has_f16c = false;
     static inline bool has_sse3 = false;
     static inline bool has_ssse3 = false;
-    static inline bool has_sse4_1 = false;
     static inline bool has_sse4_2 = false;
+    static inline bool has_sse4_1 = false;
     static inline bool has_pclmulqdq = false;
-    static inline bool has_avx = false;
-    static inline bool has_f16c = false;
 };
 
 class cpu {
