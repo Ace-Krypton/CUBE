@@ -14,7 +14,8 @@
 #endif
 
 /**
- * \brief EAX=0 will return the processor's manufacture string and highest function parameters possible
+ * \brief "mov $0x0, %eax" will return the processor's manufacture string
+ *             and highest function parameters possible (EAX=0)
  */
 auto cpu::vendor_id() -> void {
 #if defined(X86)
@@ -29,7 +30,8 @@ auto cpu::vendor_id() -> void {
 }
 
 /**
- * \brief EAX=1 will give processor features and model related information
+ * \brief "mov $0x1 , %eax" will give processor features
+ *             and model related information (EAX=1)
  */
 auto cpu::instruction_set_checker() -> void {
 #if defined(X86)
@@ -105,7 +107,10 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
 #endif
 }
 
-
+/**
+ * \brief "xor %eax, %eax" is a faster way of setting eax to zero
+ *        Also to avoid 0s when compiled as used on shell codes for exploitation of buffer overflows, etc
+ */
 auto cpu::get_cpu_id() -> void {
 #if defined(X86)
     __asm__("xor %eax, %eax\n\t");
