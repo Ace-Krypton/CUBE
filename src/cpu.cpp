@@ -13,6 +13,9 @@
 #include "cpu.hpp"
 #endif
 
+/**
+ * \brief EAX=0 will return the processor's manufacture string and highest function parameters possible
+ */
 auto cpu::vendor_id() -> void {
 #if defined(X86)
     __asm__("mov $0x0, %eax\n\t");
@@ -25,40 +28,47 @@ auto cpu::vendor_id() -> void {
 #endif
 }
 
+/**
+ * \brief EAX=1 will give processor features and model related information
+ */
 auto cpu::instruction_set_checker() -> void {
 #if defined(X86)
     __asm__("mov $0x1 , %eax\n\t");
     __asm__("cpuid\n\t");
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::detection[0x0]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::detection[0x1]));
+    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::instruction_detection[0x0]));
+    __asm__("mov %%edx, %0\n\t":"=r" (cpu::instruction_detection[0x1]));
 
-    instruction_set::has_fpu = (cpu::detection[0x1] & (0x1 << 0x0)) != 0x0;
-    instruction_set::has_mmx = (cpu::detection[0x1] & (0x1 << 0x17)) != 0x0;
-    instruction_set::has_sse = (cpu::detection[0x1] & (0x1 << 0x19)) != 0x0;
-    instruction_set::has_sse3 = (cpu::detection[0x0] & (0x1 << 0x0)) != 0x0;
-    instruction_set::has_avx = (cpu::detection[0x0] & (0x1 << 0x1C)) != 0x0;
-    instruction_set::has_sse2 = (cpu::detection[0x1] & (0x1 << 0x1A)) != 0x0;
-    instruction_set::has_ssse3 = (cpu::detection[0x0] & (0x1 << 0x9)) != 0x0;
-    instruction_set::has_f16c = (cpu::detection[0x0] & (0x1 << 0x1D)) != 0x0;
-    instruction_set::has_sse4_1 = (cpu::detection[0x0] & (0x1 << 0x13)) != 0x0;
-    instruction_set::has_sse4_2 = (cpu::detection[0x0] & (0x1 << 0x14)) != 0x0;
-    instruction_set::has_pclmulqdq = (cpu::detection[0x0] & (0x1 << 0x1)) != 0x0;
+    instruction_set::has_fpu = (cpu::instruction_detection[0x1] & (0x1 << 0x0)) != 0x0;
+    instruction_set::has_mmx = (cpu::instruction_detection[0x1] & (0x1 << 0x17)) != 0x0;
+    instruction_set::has_sse = (cpu::instruction_detection[0x1] & (0x1 << 0x19)) != 0x0;
+    instruction_set::has_sse3 = (cpu::instruction_detection[0x0] & (0x1 << 0x0)) != 0x0;
+    instruction_set::has_avx = (cpu::instruction_detection[0x0] & (0x1 << 0x1C)) != 0x0;
+    instruction_set::has_sse2 = (cpu::instruction_detection[0x1] & (0x1 << 0x1A)) != 0x0;
+    instruction_set::has_ssse3 = (cpu::instruction_detection[0x0] & (0x1 << 0x9)) != 0x0;
+    instruction_set::has_f16c = (cpu::instruction_detection[0x0] & (0x1 << 0x1D)) != 0x0;
+    instruction_set::has_sse4_1 = (cpu::instruction_detection[0x0] & (0x1 << 0x13)) != 0x0;
+    instruction_set::has_sse4_2 = (cpu::instruction_detection[0x0] & (0x1 << 0x14)) != 0x0;
+    instruction_set::has_pclmulqdq = (cpu::instruction_detection[0x0] & (0x1 << 0x1)) != 0x0;
 
     std::cout << std::boolalpha;
     std::cout << "Has FPU -> " << instruction_set::has_fpu << std::endl;
     std::cout << "Has MMX -> " << instruction_set::has_mmx << std::endl;
     std::cout << "Has SSE -> " << instruction_set::has_sse << std::endl;
-    std::cout << "Has SSE3 -> " << instruction_set::has_sse3 << std::endl;
     std::cout << "Has AVX -> " << instruction_set::has_avx << std::endl;
+    std::cout << "Has F16C -> " << instruction_set::has_f16c << std::endl;
+    std::cout << "Has SSE3 -> " << instruction_set::has_sse3 << std::endl;
     std::cout << "Has SSE2 -> " << instruction_set::has_sse2 << std::endl;
     std::cout << "Has SSSE3 -> " << instruction_set::has_ssse3 << std::endl;
-    std::cout << "Has F16C -> " << instruction_set::has_f16c << std::endl;
     std::cout << "Has SSE4_1 -> " << instruction_set::has_sse4_1 << std::endl;
     std::cout << "Has SSE4_2 -> " << instruction_set::has_sse4_2 << std::endl;
     std::cout << "Has PCLMULQDQ -> " << instruction_set::has_pclmulqdq << std::endl;
 #endif
 }
 
+/**
+ * \brief Runs CPUID instruction with eax input of 8000002H through 80000004H
+ * @param eax_values values from 8000002H to 80000004H
+ */
 auto cpu::model_name(std::uint32_t eax_values) -> void {
 #if defined(X86)
     switch (eax_values) {
@@ -94,6 +104,7 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
     std::cout << cpu_info << std::endl;
 #endif
 }
+
 
 auto cpu::get_cpu_id() -> void {
 #if defined(X86)
