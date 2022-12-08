@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-#include "os-check.hpp"
+#include "architecture.hpp"
 
 #ifdef UNIX
 #include <fstream>
@@ -88,7 +88,7 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
 
     std::cout << std::string{ (const char *)&cpu::register_output[0x0] };
 
-#elif defined(UNIX)
+#else
     std::string model_name { "model name" }, cpu_info { };
     std::ifstream file { CPU_INFO };
 
