@@ -22,7 +22,7 @@
  * 6. Storage
  * 7. RAM percentage
  * 8. CPU information */
-#define RELEASE "/etc/os-release"
+#define RELEASE "/etc/os-release/"
 
 static std::string base_path = "/sys/class/power_supply/";
 

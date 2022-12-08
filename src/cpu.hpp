@@ -6,7 +6,7 @@
 #pragma once
 #ifndef CUBE_CPU_HPP
 #define CUBE_CPU_HPP
-#define CPU_INFO "/proc/cpuinfo"
+#define CPU_INFO "/proc/cpuinfo/"
 
 struct instruction_set {
     static inline bool has_fpu = false;

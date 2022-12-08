@@ -3,6 +3,14 @@
  * See LICENSE file for license details
  */
 
+/**
+ * TODO List
+ * 1. Getting number of physical and logical cores
+ * 2. Getting clock speed (Max, Regular)
+ * 3. Getting cache size
+ * 4. Sockets?
+ */
+
 #include <iostream>
 
 #include "architecture.hpp"
