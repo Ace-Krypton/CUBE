@@ -26,10 +26,12 @@ class cpu {
 public:
     static inline std::uint32_t vendor_output[0x3];
     static inline std::uint32_t register_output[0xA];
-    static inline std::uint32_t instruction_detection[0x2];
+    static inline std::uint32_t instruction_detection[0x3];
 
-    static auto vendor_id() -> void;
     static auto get_cpu_id() -> void;
+    static auto vendor_id() -> void;
+    static auto get_both_cores() -> void;
+    static auto cpu_id(size_t i, unsigned regs[4]) -> void;
     static auto instruction_set_checker() -> void;
     static auto model_name(std::uint32_t eax_values) -> void;
 };

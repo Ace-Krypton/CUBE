@@ -37,6 +37,43 @@ auto cpu::vendor_id() -> void {
 #endif
 }
 
+auto cpu::cpu_id(size_t i, unsigned regs[4]) -> void {
+    asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (i), "c" (0));
+}
+
+auto cpu::get_both_cores() -> void {
+    unsigned regs[0x4];
+
+    char vendor[0xC];
+    cpu::cpu_id(0, regs);
+    ((unsigned *)vendor)[0x0] = regs[0x1];
+    ((unsigned *)vendor)[0x1] = regs[0x3];
+    ((unsigned *)vendor)[0x2] = regs[0x2];
+    std::string cpu_vendor = std::string(vendor, 0xC);
+
+    cpu::cpu_id(0x1, regs);
+    unsigned cpu_features = regs[0x3];
+
+    cpu::cpu_id(0x1, regs);
+    unsigned logical = (regs[0x1] >> 0x10) & 0xff;
+    std::cout << "logical cpus: " << logical << std::endl;
+    unsigned cores = logical;
+
+    if (cpu_vendor == "GenuineIntel") {
+        cpu::cpu_id(0x4, regs);
+        cores = ((regs[0x0] >> 0x1A) & 0x3f) + 0x1;
+
+    } else if (cpu_vendor == "AuthenticAMD") {
+        cpu::cpu_id(0x80000008, regs);
+        cores = ((unsigned)(regs[0x2] & 0xff)) + 0x1;
+    }
+
+    std::cout << "cpu cores: " << cores << std::endl;
+
+    bool hyperThreads = cpu_features & (0x1 << 0x1C) && cores < logical;
+    std::cout << "hyper-threads: " << (hyperThreads ? "true" : "false") << std::endl;
+}
+
 /**
  * \brief "mov $0x1 , %eax" will give processor features
  *             and model related information (EAX=1)
@@ -45,6 +82,7 @@ auto cpu::instruction_set_checker() -> void {
 #if defined(X86)
     __asm__("mov $0x1 , %eax\n\t");
     __asm__("cpuid\n\t");
+    __asm__("mov %%eax, %0\n\t":"=r" (cpu::instruction_detection[0x2]));
     __asm__("mov %%ecx, %0\n\t":"=r" (cpu::instruction_detection[0x0]));
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::instruction_detection[0x1]));
 
