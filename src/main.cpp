@@ -82,6 +82,7 @@ auto main(int argc, const char* argv[]) -> int {
     size_t num_cores = sysconf(_SC_NPROCESSORS_ONLN);
     std::cout << num_cores << std::endl;
     cpu::instruction_set_checker();
+    cpu::print_instructions();
     std::cout << cube::version() << std::endl;
     cpu::vendor_id();
     if (std::string{ (const char *)cpu::vendor_output } == "GenuineIntel") {

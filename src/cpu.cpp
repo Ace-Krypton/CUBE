@@ -37,8 +37,9 @@ auto cpu::vendor_id() -> void {
 #endif
 }
 
-auto cpu::cpu_id(size_t i, unsigned regs[4]) -> void {
-    asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (i), "c" (0));
+auto cpu::cpu_id(size_t i, unsigned regs[0x4]) -> void {
+    asm volatile ("cpuid" : "=a" (regs[0x0]), "=b" (regs[0x1]), "=c" (regs[0x2]), "=d" (regs[0x3])
+                : "a" (i), "c" (0x0));
 }
 
 auto cpu::get_both_cores() -> void {
@@ -97,7 +98,10 @@ auto cpu::instruction_set_checker() -> void {
     instruction_set::has_sse4_1 = (cpu::instruction_detection[0x0] & (0x1 << 0x13)) != 0x0;
     instruction_set::has_sse4_2 = (cpu::instruction_detection[0x0] & (0x1 << 0x14)) != 0x0;
     instruction_set::has_pclmulqdq = (cpu::instruction_detection[0x0] & (0x1 << 0x1)) != 0x0;
+#endif
+}
 
+auto cpu::print_instructions() -> void {
     std::cout << std::boolalpha;
     std::cout << "Has FPU -> " << instruction_set::has_fpu << std::endl;
     std::cout << "Has MMX -> " << instruction_set::has_mmx << std::endl;
@@ -110,7 +114,6 @@ auto cpu::instruction_set_checker() -> void {
     std::cout << "Has SSE4_1 -> " << instruction_set::has_sse4_1 << std::endl;
     std::cout << "Has SSE4_2 -> " << instruction_set::has_sse4_2 << std::endl;
     std::cout << "Has PCLMULQDQ -> " << instruction_set::has_pclmulqdq << std::endl;
-#endif
 }
 
 /**
