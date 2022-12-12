@@ -84,7 +84,7 @@ auto main(int argc, const char* argv[]) -> int {
     cpu::instruction_set_checker();
     cpu::print_instructions();
     std::cout << cube::version() << std::endl;
-    cpu::vendor_id();
+    std::cout << cpu::vendor_id() << std::endl;
     if (std::string{ (const char *)cpu::vendor_output } == "GenuineIntel") {
         unsigned cores = (((cpu::instruction_detection[0x2] >> 0x1A) & 0x3f) + 0x1);
         std::cout << cores << std::endl;

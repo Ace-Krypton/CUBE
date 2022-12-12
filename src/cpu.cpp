@@ -24,8 +24,9 @@
 /**
  * \brief "mov $0x0, %eax" will return the processor's manufacture string
  *             and highest function parameters possible (EAX=0)
+ * @return ID of the vendor (GenuineIntel) for example
  */
-auto cpu::vendor_id() -> void {
+auto cpu::vendor_id() -> std::string {
 #if defined(X86)
     __asm__("mov $0x0, %eax\n\t");
     __asm__("cpuid\n\t");
@@ -33,7 +34,7 @@ auto cpu::vendor_id() -> void {
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::vendor_output[0x1]));
     __asm__("mov %%ecx, %0\n\t":"=r" (cpu::vendor_output[0x2]));
 
-    std::cout << std::string{ (const char *)cpu::vendor_output };
+    return std::string{ (const char *)cpu::vendor_output };
 #endif
 }
 
@@ -45,13 +46,6 @@ auto cpu::cpu_id(size_t i, unsigned regs[0x4]) -> void {
 auto cpu::get_both_cores() -> void {
     unsigned regs[0x4];
 
-    char vendor[0xC];
-    cpu::cpu_id(0, regs);
-    ((unsigned *)vendor)[0x0] = regs[0x1];
-    ((unsigned *)vendor)[0x1] = regs[0x3];
-    ((unsigned *)vendor)[0x2] = regs[0x2];
-    std::string cpu_vendor = std::string(vendor, 0xC);
-
     cpu::cpu_id(0x1, regs);
     unsigned cpu_features = regs[0x3];
 
@@ -60,11 +54,11 @@ auto cpu::get_both_cores() -> void {
     std::cout << "logical cpus: " << logical << std::endl;
     unsigned cores = logical;
 
-    if (cpu_vendor == "GenuineIntel") {
+    if (cpu::vendor_id() == "GenuineIntel") {
         cpu::cpu_id(0x4, regs);
         cores = ((regs[0x0] >> 0x1A) & 0x3f) + 0x1;
 
-    } else if (cpu_vendor == "AuthenticAMD") {
+    } else if (cpu::vendor_id() == "AuthenticAMD") {
         cpu::cpu_id(0x80000008, regs);
         cores = ((unsigned)(regs[0x2] & 0xff)) + 0x1;
     }
