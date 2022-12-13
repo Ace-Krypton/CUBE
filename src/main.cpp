@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <filesystem>
 #include <experimental/string_view>
-#include <thread>
 
 #include "cpu.hpp"
 #include "version.hpp"
