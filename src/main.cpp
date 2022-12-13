@@ -75,28 +75,20 @@ auto distro_display() -> std::string {
 auto main(int argc, const char* argv[]) -> int {
     /*  -------------------------------  Tests  -------------------------------  */
     cpu::get_both_cores();
-    bool hyper_threads = (cpu::instruction_detection[0x1] & (0x1 << 0x1C)) != 0x0;
-    std::cout << hyper_threads << std::endl;
-    [[maybe_unused]] unsigned int concurrency = std::thread::hardware_concurrency();
-    std::cout << concurrency << std::endl;
-    size_t num_cores = sysconf(_SC_NPROCESSORS_ONLN);
-    std::cout << num_cores << std::endl;
+    std::cout << std::endl;
     cpu::instruction_set_checker();
     cpu::print_instructions();
+    std::cout << std::endl;
     std::cout << cube::version() << std::endl;
+    std::cout << std::endl;
     std::cout << cpu::vendor_id() << std::endl;
-    if (std::string{ (const char *)cpu::vendor_output } == "GenuineIntel") {
-        unsigned cores = (((cpu::instruction_detection[0x2] >> 0x1A) & 0x3f) + 0x1);
-        std::cout << cores << std::endl;
-    }
-
-    /*  ----------------------------------------------------------------------  */
-
     std::cout << std::endl;
     cpu::get_cpu_id();
     std::cout << std::endl;
     std::cout << physmem_total() << std::endl;
+    std::cout << std::endl;
     std::cout << physmem_available() << std::endl;
+    /*  ----------------------------------------------------------------------  */
 
     for (std::size_t i { 0x1 }; i < argc; i++) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
