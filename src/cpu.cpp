@@ -68,7 +68,7 @@ auto cpu::get_both_cores() -> void {
         __asm__("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
         __asm__("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
 
-        physical_cores = ((cpu::cores_register[0x0] >> 0x1A) & 0x3f) + 0x1;
+        physical_cores = ((std::uint32_t)(cpu::cores_register[0x0] >> 0x1A) & 0x3f) + 0x1;
 
     } else if (cpu::vendor_id() == "AuthenticAMD") {
         __asm__("xor %eax, %eax\n\t");
