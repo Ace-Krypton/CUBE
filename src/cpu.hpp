@@ -32,7 +32,6 @@ public:
     static auto vendor_id() -> std::string;
     static auto get_both_cores() -> void;
     static auto print_instructions() -> void;
-    static auto cpu_id(size_t i, unsigned regs[4]) -> void;
     static auto instruction_set_checker() -> void;
     static auto model_name(std::uint32_t eax_values) -> void;
 };
