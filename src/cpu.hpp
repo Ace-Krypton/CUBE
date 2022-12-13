@@ -25,6 +25,7 @@ struct instruction_set {
 class cpu {
 public:
     static inline std::uint32_t vendor_output[0x3];
+    static inline std::uint32_t cores_register[0x4];
     static inline std::uint32_t register_output[0xA];
     static inline std::uint32_t instruction_detection[0x3];
 

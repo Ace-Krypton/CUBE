@@ -38,21 +38,22 @@ auto cpu::vendor_id() -> std::string {
 #endif
 }
 
+/**
+ * \brief Gets the cpu core information both (Logical and Physical) from CPUID
+ *             Also checks Hyper-Threading support
+ */
 auto cpu::get_both_cores() -> void {
-    unsigned registers[0x4];
-
     __asm__("mov $0x1, %eax\n\t");
     __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (registers[0x0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (registers[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (registers[0x2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (registers[0x3]));
+    __asm__("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
+    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
+    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
+    __asm__("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
 
-    unsigned cpu_features = registers[0x3];
-
-    unsigned logical_cores = (registers[0x1] >> 0x10) & 0xff;
-    std::cout << "logical_cores cpus: " << logical_cores << std::endl;
-    unsigned physical_cores = logical_cores;
+    std::uint32_t cpu_features = cpu::cores_register[0x3];
+    std::uint32_t logical_cores = (cpu::cores_register[0x1] >> 0x10) & 0xff;
+    std::cout << "Logical: " << logical_cores << std::endl;
+    std::uint32_t physical_cores = logical_cores;
 
     if (cpu::vendor_id() == "GenuineIntel") {
         __asm__("xor %eax, %eax\n\t");
@@ -62,12 +63,12 @@ auto cpu::get_both_cores() -> void {
 
         __asm__("mov $0x4, %eax\n\t");
         __asm__("cpuid\n\t");
-        __asm__("mov %%eax, %0\n\t":"=r" (registers[0x0]));
-        __asm__("mov %%ebx, %0\n\t":"=r" (registers[0x1]));
-        __asm__("mov %%ecx, %0\n\t":"=r" (registers[0x2]));
-        __asm__("mov %%edx, %0\n\t":"=r" (registers[0x3]));
+        __asm__("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
+        __asm__("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
+        __asm__("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
+        __asm__("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
 
-        physical_cores = ((registers[0x0] >> 0x1A) & 0x3f) + 0x1;
+        physical_cores = ((cpu::cores_register[0x0] >> 0x1A) & 0x3f) + 0x1;
 
     } else if (cpu::vendor_id() == "AuthenticAMD") {
         __asm__("xor %eax, %eax\n\t");
@@ -77,17 +78,17 @@ auto cpu::get_both_cores() -> void {
 
         __asm__("mov $0x80000008, %eax\n\t");
         __asm__("cpuid\n\t");
-        __asm__("mov %%eax, %0\n\t":"=r" (registers[0x0]));
-        __asm__("mov %%ebx, %0\n\t":"=r" (registers[0x1]));
-        __asm__("mov %%ecx, %0\n\t":"=r" (registers[0x2]));
-        __asm__("mov %%edx, %0\n\t":"=r" (registers[0x3]));
-        physical_cores = ((unsigned)(registers[0x2] & 0xff)) + 0x1;
+        __asm__("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
+        __asm__("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
+        __asm__("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
+        __asm__("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
+        physical_cores = ((std::uint32_t)(cpu::cores_register[0x2] & 0xff)) + 0x1;
     }
 
-    std::cout << "cpu physical_cores: " << physical_cores << std::endl;
+    std::cout << "Physical: " << physical_cores << std::endl;
 
-    bool hyperThreads = cpu_features & (0x1 << 0x1C) && physical_cores < logical_cores;
-    std::cout << "hyper-threads: " << (hyperThreads ? "true" : "false") << std::endl;
+    bool has_hyper_threads = cpu_features & (0x1 << 0x1C) && physical_cores < logical_cores;
+    std::cout << "Hyper-Threads: " << (has_hyper_threads ? "true" : "false") << std::endl;
 }
 
 /**
