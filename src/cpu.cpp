@@ -183,6 +183,6 @@ auto cpu::get_cpu_id() -> void {
     __asm__("xor %ecx, %ecx\n\t");
     __asm__("xor %edx, %edx\n\t");
 
-    for (std::uint32_t values { 0x1 }; values <= 0x3; values++) cpu::model_name(values);
+    for (std::uint32_t values { 0x1 }; values <= 0x3; ++values) cpu::model_name(values);
 #endif
 }

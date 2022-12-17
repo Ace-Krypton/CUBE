@@ -71,8 +71,19 @@ auto distro_display() -> std::string {
     return (name.empty()) ? std::string() : name;
 }
 
+auto rdtsc_calculator() -> uint64_t {
+    uint64_t result;
+    __asm__ __volatile__ ("rdtsc" : "=A" (result));
+    return result;
+}
+
 auto main(int argc, const char* argv[]) -> int {
     /*  -------------------------------  Tests  -------------------------------  */
+    uint64_t t1 = rdtsc_calculator();
+    sleep(1);
+    uint64_t t2 = rdtsc_calculator();
+    std::cout << "CPU clock frequency is -> " << t2 - t1 << std::endl;
+    std::cout << "------------------------------------------------" << std::endl;
     cpu::get_both_cores();
     std::cout << std::endl;
     cpu::instruction_set_checker();
@@ -89,7 +100,7 @@ auto main(int argc, const char* argv[]) -> int {
     std::cout << physmem_available() << std::endl;
     /*  ----------------------------------------------------------------------  */
 
-    for (std::size_t i { 0x1 }; i < argc; i++) {
+    for (std::size_t i { 0x1 }; i < argc; ++i) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
             cpu::vendor_id();
             cpu::get_cpu_id();
