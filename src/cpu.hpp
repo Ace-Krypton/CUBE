@@ -24,16 +24,19 @@ struct instruction_set {
 
 class cpu {
 public:
+    static inline std::uint32_t invariantTSC[0x4];
     static inline std::uint32_t vendor_output[0x3];
     static inline std::uint32_t cores_register[0x4];
     static inline std::uint32_t register_output[0xA];
     static inline std::uint32_t instruction_detection[0x3];
 
     static auto get_cpu_id() -> void;
-    static auto vendor_id() -> std::string;
     static auto get_both_cores() -> void;
+    static auto vendor_id() -> std::string;
     static auto print_instructions() -> void;
+    static auto supports_invariantTSC() -> bool;
     static auto instruction_set_checker() -> void;
     static auto model_name(std::uint32_t eax_values) -> void;
+    [[maybe_unused]] [[noreturn]] static auto fatal_error(char const * Format, ...) -> void;
 };
 #endif //CUBE_CPU_HPP

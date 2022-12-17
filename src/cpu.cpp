@@ -12,12 +12,11 @@
  */
 
 #include <iostream>
+#include <cstdarg>
 
 #include "architecture.hpp"
 
 #ifdef UNIX
-#include <fstream>
-
 #include "cpu.hpp"
 #endif
 
@@ -36,6 +35,25 @@ auto cpu::vendor_id() -> std::string {
 
     return std::string{ (const char *)cpu::vendor_output };
 #endif
+}
+
+[[maybe_unused]] [[noreturn]] auto cpu::fatal_error(char const * Format, ...) -> void {
+    fflush(stdout);
+    va_list var_args;
+    va_start(var_args, Format);
+    vfprintf(stderr, Format, var_args);
+    exit(1);
+}
+
+auto cpu::supports_invariantTSC() -> bool {
+    __asm__("mov $0x80000007, %eax\n\t");
+    __asm__("cpuid\n\t");
+    __asm__("mov %%eax, %0\n\t":"=r" (cpu::invariantTSC[0x0]));
+    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::invariantTSC[0x1]));
+    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::invariantTSC[0x2]));
+    __asm__("mov %%edx, %0\n\t":"=r" (cpu::invariantTSC[0x3]));
+
+    return (cpu::invariantTSC[0x3] & (1 << 8)) != 0;
 }
 
 /**
@@ -154,6 +172,7 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
     std::cout << std::string{ (const char *)&cpu::register_output[0x0] };
 
 #else
+    #include <fstream>
     std::string model_name { "model name" }, cpu_info { };
     std::ifstream file { CPU_INFO };
 
