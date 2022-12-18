@@ -78,7 +78,45 @@ auto rdtsc_calculator() -> uint64_t {
 }
 
 auto main(int argc, const char* argv[]) -> int {
+    bool invariant = cpu::supports_invariantTSC();
+
+    printf("   Invariant TSC: %s\n", invariant ? "True" : "False");
+
+    if (!invariant) {
+        printf ("*** Without invariant TSC rdtsc is not a useful timer for wall clock time.\n");
+        return 1;
+    }
+
+    char const * source;
+    double res;
+
+    if (cpu::extract_leaf_15H(&res)) {
+        source = "leaf 15H";
+    } else if (cpu::read_HW_tick_from_name(&res)) {
+        source = "model name string";
+    } else {
+        res = cpu::measure_TSC_tick();
+        source = "measurement";
+    }
+
+    printf ("   From %s frequency %sz => %s\n",
+            source,
+            cpu::format_SI(1./res,9,'H').c_str(),
+            cpu::format_SI(res,9,'s').c_str());
+
+    double measured = cpu::measure_TSC_tick();
+    printf ("   Sanity check against std::chrono::steady_clock gives frequency %sz => %s\n",
+            cpu::format_SI(1./measured,9,'H').c_str(), cpu::format_SI(measured,9,'s').c_str());
+    uint64_t minTicks = cpu::measure_clock_granularity();
+    res = res*minTicks;
+
+    printf ("Measured granularity = %llu tick%s => %sz, %s\n",
+            (unsigned long long)minTicks, minTicks != 1 ? "s": "", cpu::format_SI(1./res,9,'H').c_str(),
+            cpu::format_SI(res,9,'s').c_str());
+
     /*  -------------------------------  Tests  -------------------------------  */
+    bool is_supports = cpu::supports_invariantTSC();
+    std::cout << std::boolalpha << "Supports Invariant TSC? -> " << is_supports << std::endl;
     uint64_t t1 = rdtsc_calculator();
     sleep(1);
     uint64_t t2 = rdtsc_calculator();
