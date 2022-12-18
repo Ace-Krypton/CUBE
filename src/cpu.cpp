@@ -41,6 +41,7 @@ auto cpu::vendor_id() -> std::string {
 #endif
 }
 
+#if defined(X86)
 /**
  * \brief Formats values to given styles
  * @param interval
@@ -209,7 +210,7 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
     if (model_name.find("Apple") != std::string::npos) return false;
 
     char const * model = model_name.c_str();
-    auto end = model + strlen(model) - 0x3;
+    auto end = model + std::strlen(model) - 0x3;
     uint64_t multiplier;
 
     if (*end == 'M') multiplier = 1000LL * 1000LL;
@@ -244,7 +245,7 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
  * \brief Check whether the clock actually ticks at the same rate as its value is enumerated in
  * @return delta variable
  */
-auto  cpu::measure_clock_granularity() -> uint64_t {
+auto cpu::measure_clock_granularity() -> uint64_t {
     uint64_t delta = std::numeric_limits<uint64_t>::max();
 
     for (size_t i = 0x0; i < 0x32; ++i) {
@@ -334,6 +335,7 @@ auto cpu::get_both_cores() -> void {
     bool has_hyper_threads = cpu_features & (0x1 << 0x1C) && physical_cores < logical_cores;
     std::cout << "Hyper-Threads: " << (has_hyper_threads ? "true" : "false") << std::endl;
 }
+#endif
 
 /**
  * \brief "mov $0x1 , %eax" will give processor features
