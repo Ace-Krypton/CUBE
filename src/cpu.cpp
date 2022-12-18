@@ -41,8 +41,17 @@ auto cpu::vendor_id() -> std::string {
 #endif
 }
 
+/**
+ * \brief Formats values to given styles
+ * @param interval
+ * @param width
+ * @param unit
+ * @return formatted string after normalising the value into
+ * engineering style and using a suitable unit prefix (e.g. ms, us, ns)
+ */
 auto cpu::format_SI(double interval, int width, char unit) -> std::string {
     std::stringstream os;
+
     static struct {
         double scale;
         char prefix;
@@ -53,13 +62,14 @@ auto cpu::format_SI(double interval, int width, char unit) -> std::string {
                   {1.e-27, 'Y'}};
 
     if (interval == 0.0) {
-        os << std::setw(width - 3)
+        os << std::setw(width - 0x3)
            << std::right << "0.00"
-           << std::setw(3) << unit;
+           << std::setw(0x3) << unit;
         return os.str();
     }
 
     bool negative = false;
+
     if (interval < 0.0) {
         negative = true;
         interval = -interval;
@@ -68,42 +78,63 @@ auto cpu::format_SI(double interval, int width, char unit) -> std::string {
     for (auto & range : ranges) {
         if (interval * range.scale < 1.e0) {
             interval = interval * 1000.e0 * range.scale;
-            os << std::fixed << std::setprecision(2) << std::setw(width - 3)
-               << std::right << (negative ? -interval : interval) << std::setw(2)
-               << range.prefix << std::setw(1) << unit;
+            os << std::fixed << std::setprecision(2) << std::setw(width - 0x3)
+               << std::right << (negative ? -interval : interval) << std::setw(0x2)
+               << range.prefix << std::setw(0x1) << unit;
             return os.str();
         }
     }
 
-    os << std::setprecision(2) << std::fixed
-       << std::right << std::setw(width - 3)
-       << interval << std::setw(3) << unit;
+    os << std::setprecision(0x2) << std::fixed
+       << std::right << std::setw(width - 0x3)
+       << interval << std::setw(0x3) << unit;
 
     return os.str();
 }
 
+/**
+ * \brief Reads cycle count with assembly instruction
+ * \code __asm__ __volatile__ ("rdtsc" : "=a" (some_variable), "=d" (some_other_variable))
+ *                                          equals
+ * \code __rdtsc() function
+ * @return value returned from cpu after instruction
+ */
 inline auto cpu::read_cycle_count()-> uint64_t {
     return __rdtsc();
 }
 
+/**
+ * \brief Measures time stamp counter tick with steady_clock
+ *          as documentation recommends it against hrtime
+ * @return tick time
+ */
 auto cpu::measure_TSC_tick() -> double {
-    auto start = std::chrono::steady_clock::now();
-    uint64_t startTick = cpu::read_cycle_count();
-    auto end = start + std::chrono::milliseconds(5);
+    std::chrono::time_point start = std::chrono::steady_clock::now();
+    uint64_t start_tick = cpu::read_cycle_count();
+    std::chrono::time_point end = start + std::chrono::milliseconds(0x5);
     while (std::chrono::steady_clock::now() < end) { }
-    size_t elapsed = cpu::read_cycle_count() - startTick;
-    double tickTime = 5.e-3 / static_cast<double>(elapsed);
-    return tickTime;
+    size_t elapsed = cpu::read_cycle_count() - start_tick;
+    double tick_time = 5.e-3 / static_cast<double>(elapsed);
+    return tick_time;
 }
 
+/**
+ * \brief Fatal error indicator
+ * @param Format type
+ * @param ... (Variadic function)
+ */
 [[maybe_unused]] [[noreturn]] auto cpu::fatal_error(char const * Format, ...) -> void {
     fflush(stdout);
     va_list var_args;
     va_start(var_args, Format);
     vfprintf(stderr, Format, var_args);
-    exit(1);
+    exit(0x1);
 }
 
+/**
+ * \brief Checks if CPU supports invariant time stamp counter(TSC)
+ * @return boolean value
+ */
 auto cpu::supports_invariantTSC() -> bool {
     __asm__("mov $0x80000007, %eax\n\t");
     __asm__("cpuid\n\t");
@@ -112,9 +143,19 @@ auto cpu::supports_invariantTSC() -> bool {
     __asm__("mov %%ecx, %0\n\t":"=r" (cpu::invariantTSC[0x2]));
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::invariantTSC[0x3]));
 
-    return (cpu::invariantTSC[0x3] & (1 << 8)) != 0;
+    return (cpu::invariantTSC[0x3] & (0x1 << 0x8)) != 0x0;
 }
 
+/**
+ * \brief Extract the value from CPUID information
+ * “TSC frequency” = “core crystal clock frequency” * EBX/EAX
+ * EAX Bits 31 - 00: An unsigned integer which is the denominator of the TSC/”core crystal clock” ratio
+ * EBX Bits 31 - 00: An unsigned integer which is the numerator of the TSC/”core crystal clock” ratio
+ * ECX Bits 31 - 00: An unsigned integer which is the nominal frequency of the core crystal clock in Hz
+ * EDX Bits 31 - 00: Reserved = 0.
+ * @param time
+ * @return boolean value
+ */
 auto cpu::extract_leaf_15H(double * time) -> bool {
     __asm__("mov $0x0, %eax\n\t");
     __asm__("cpuid\n\t");
@@ -140,44 +181,46 @@ auto cpu::extract_leaf_15H(double * time) -> bool {
     __asm__("mov %%ecx, %0\n\t":"=r" (cpu::leaf_extract[0x2]));
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::leaf_extract[0x3]));
 
-    if (cpu::leaf_extract[0x1] == 0 || cpu::leaf_extract[0x2] == 0) {
+    if (cpu::leaf_extract[0x1] == 0x0 || cpu::leaf_extract[0x2] == 0x0) {
         std::cout << "cpuid leaf 15H does not give frequency" << std::endl;
         return false;
     }
 
     double core_crystal_frequency = cpu::leaf_extract[0x2];
     *time = cpu::leaf_extract[0x0] / (cpu::leaf_extract[0x1] * core_crystal_frequency);
-    printf("   cpuid leaf 15H: coreCrystal = %g, eax=%u, ebx=%u, ecx=%u "
+    printf("cpuid leaf 15H: coreCrystal = %g, eax=%u, ebx=%u, ecx=%u "
            "=> %s\n",
            core_crystal_frequency,
            cpu::leaf_extract[0x0],
            cpu::leaf_extract[0x1],
            cpu::leaf_extract[0x2],
-           cpu::format_SI(*time, 9, 's').c_str());
+           cpu::format_SI(*time, 0x9, 's').c_str());
     return true;
 }
 
+/**
+ * \brief Try to extract hardware tick from the brand string
+ * @param time
+ * @return boolean value
+ */
 auto cpu::read_HW_tick_from_name(double * time) -> bool {
     std::string model_name = cpu::vendor_id();
     
     if (model_name.find("Apple") != std::string::npos) return false;
 
     char const * model = model_name.c_str();
-    auto end = model + strlen(model) - 3;
+    auto end = model + strlen(model) - 0x3;
     uint64_t multiplier;
 
-    if (*end == 'M')multiplier = 1000LL * 1000LL;
-    
-    else if (*end == 'G')multiplier = 1000LL * 1000LL * 1000LL;
-    
-    else if (*end == 'T')multiplier = 1000LL * 1000LL * 1000LL * 1000LL;
-    
+    if (*end == 'M') multiplier = 1000LL * 1000LL;
+    else if (*end == 'G') multiplier = 1000LL * 1000LL * 1000LL;
+    else if (*end == 'T') multiplier = 1000LL * 1000LL * 1000LL * 1000LL;
     else return false;
     
     while (*end != ' ' && end >= model) end--;
     
     char * uninteresting;
-    double freq = strtod(end + 1, &uninteresting);
+    double freq = strtod(end + 0x1, &uninteresting);
     
     if (freq == 0.0) return false;
 
@@ -185,6 +228,10 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
     return true;
 }
 
+/**
+ * \brief Measures hardware tick time
+ * @return value from time stamp counter function
+ */
 [[maybe_unused]] auto cpu::read_HW_tick_time() -> double {
     if (!cpu::supports_invariantTSC()) cpu::fatal_error("TSC may not be invariant. Use another clock!");
     double res;
@@ -193,10 +240,14 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
     return cpu::measure_TSC_tick();
 }
 
+/**
+ * \brief Check whether the clock actually ticks at the same rate as its value is enumerated in
+ * @return delta variable
+ */
 auto  cpu::measure_clock_granularity() -> uint64_t {
     uint64_t delta = std::numeric_limits<uint64_t>::max();
 
-    for (int i = 0; i < 50; i++) {
+    for (size_t i = 0x0; i < 0x32; ++i) {
         uint64_t m1 = cpu::read_cycle_count();
         uint64_t m2 = cpu::read_cycle_count();
         uint64_t m3 = cpu::read_cycle_count();
@@ -208,24 +259,25 @@ auto  cpu::measure_clock_granularity() -> uint64_t {
         uint64_t m9 = cpu::read_cycle_count();
         uint64_t m10 = cpu::read_cycle_count();
 
-        auto d = (m2 - m1);
-        if (d != 0) delta = std::min(d, delta);
+        size_t d = (m2 - m1);
+
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m3 - m2);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m4 - m3);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m5 - m4);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m6 - m5);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m7 - m6);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m8 - m7);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m9 - m8);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
         d = (m10 - m9);
-        if (d != 0) delta = std::min(d, delta);
+        if (d != 0x0) delta = std::min(d, delta);
     }
     return delta;
 }
@@ -309,6 +361,9 @@ auto cpu::instruction_set_checker() -> void {
 #endif
 }
 
+/**
+ * \brief Prints instructions from instruction set
+ */
 auto cpu::print_instructions() -> void {
     std::cout << std::boolalpha;
     std::cout << "Has FPU -> " << instruction_set::has_fpu << std::endl;

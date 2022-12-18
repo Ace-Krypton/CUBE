@@ -71,20 +71,17 @@ auto distro_display() -> std::string {
     return (name.empty()) ? std::string() : name;
 }
 
-auto rdtsc_calculator() -> uint64_t {
-    uint64_t result;
-    __asm__ __volatile__ ("rdtsc" : "=A" (result));
-    return result;
-}
-
 auto main(int argc, const char* argv[]) -> int {
+    /*  ------------------------------------  Tests  ------------------------------------  */
+
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
 
-    printf("   Invariant TSC: %s\n", invariant ? "True" : "False");
+    printf("Invariant TSC: %s\n", invariant ? "True" : "False");
 
     if (!invariant) {
-        printf ("*** Without invariant TSC rdtsc is not a useful timer for wall clock time.\n");
-        return 1;
+        std::cout << "*** Without invariant TSC rdtsc is not a useful timer for wall clock time" << std::endl;
+        return 0x1;
     }
 
     char const * source;
@@ -92,51 +89,49 @@ auto main(int argc, const char* argv[]) -> int {
 
     if (cpu::extract_leaf_15H(&res)) {
         source = "leaf 15H";
+
     } else if (cpu::read_HW_tick_from_name(&res)) {
         source = "model name string";
+
     } else {
         res = cpu::measure_TSC_tick();
         source = "measurement";
     }
 
-    printf ("   From %s frequency %sz => %s\n",
+    printf ("From %s frequency %sz => %s\n",
             source,
-            cpu::format_SI(1./res,9,'H').c_str(),
-            cpu::format_SI(res,9,'s').c_str());
+            cpu::format_SI(1./res,0x9,'H').c_str(),
+            cpu::format_SI(res,0x9,'s').c_str());
 
     double measured = cpu::measure_TSC_tick();
-    printf ("   Sanity check against std::chrono::steady_clock gives frequency %sz => %s\n",
-            cpu::format_SI(1./measured,9,'H').c_str(), cpu::format_SI(measured,9,'s').c_str());
+
+    printf ("Sanity check against std::chrono::steady_clock gives frequency %sz => %s\n",
+            cpu::format_SI(1./measured,0x9,'H').c_str(),
+            cpu::format_SI(measured,0x9,'s').c_str());
+
     uint64_t minTicks = cpu::measure_clock_granularity();
-    res = res*minTicks;
+    res = res*(double)minTicks;
 
     printf ("Measured granularity = %llu tick%s => %sz, %s\n",
-            (unsigned long long)minTicks, minTicks != 1 ? "s": "", cpu::format_SI(1./res,9,'H').c_str(),
-            cpu::format_SI(res,9,'s').c_str());
+            (unsigned long long)minTicks, minTicks != 0x1 ? "s": "", cpu::format_SI(1./res,0x9,'H').c_str(),
+            cpu::format_SI(res,0x9,'s').c_str());
 
-    /*  -------------------------------  Tests  -------------------------------  */
-    bool is_supports = cpu::supports_invariantTSC();
-    std::cout << std::boolalpha << "Supports Invariant TSC? -> " << is_supports << std::endl;
-    uint64_t t1 = rdtsc_calculator();
-    sleep(1);
-    uint64_t t2 = rdtsc_calculator();
-    std::cout << "CPU clock frequency is -> " << t2 - t1 << std::endl;
-    std::cout << "------------------------------------------------" << std::endl;
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
     cpu::get_both_cores();
-    std::cout << std::endl;
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
     cpu::instruction_set_checker();
     cpu::print_instructions();
-    std::cout << std::endl;
-    std::cout << cube::version() << std::endl;
-    std::cout << std::endl;
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
+    std::cout << "Cube version: " << cube::version() << std::endl;
     std::cout << cpu::vendor_id() << std::endl;
-    std::cout << std::endl;
     cpu::get_cpu_id();
     std::cout << std::endl;
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
     std::cout << physmem_total() << std::endl;
-    std::cout << std::endl;
     std::cout << physmem_available() << std::endl;
-    /*  ----------------------------------------------------------------------  */
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
+
+    /*  ---------------------------------------------------------------------------------  */
 
     for (std::size_t i { 0x1 }; i < argc; ++i) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
@@ -158,4 +153,6 @@ auto main(int argc, const char* argv[]) -> int {
         }
     }
     return 0x0;
+
+    /*  ---------------------------------------------------------------------------------  */
 }
