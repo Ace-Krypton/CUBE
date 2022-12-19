@@ -419,12 +419,28 @@ auto cpu::instruction_set_checker() -> void {
  * \brief Prints instructions from instruction set
  */
 auto cpu::print_instructions() -> void {
-
-    std::cout << std::boolalpha;
+    std::uint64_t counter = 0x0;
     cpu::instruction_set_checker();
-    for (auto const & element : instruction_set::instructions) {
-        std::cout << element.first << " " << element.second << std::endl;
+    for (auto const & elements : instruction_set::instructions) {
+        if (counter == 0x5) {
+            std::cout << std::endl;
+            counter = 0x0;
+        }
+
+        std::cout << " [ " << elements.first;
+        switch (elements.first.size()) {
+            case 2: std::cout << "          "; break;
+            case 3: std::cout << "         "; break;
+            case 4: std::cout << "        "; break;
+            case 5: std::cout << "       "; break;
+            case 6: std::cout << "      "; break;
+            case 7: std::cout << "     "; break;
+            case 11: std::cout << " "; break;
+        }
+        std::cout << ((elements.second) ? "[Y] ]" : "[N] ]");
+        counter++;
     }
+    std::cout << std::endl;
 }
 
 /**
