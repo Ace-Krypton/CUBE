@@ -73,6 +73,7 @@ auto distro_display() -> std::string {
 
 auto main(int argc, const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
+    std::cout << "-------------------------------------------------------------------------" << std::endl;
 
     std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
@@ -119,7 +120,6 @@ auto main(int argc, const char* argv[]) -> int {
     std::cout << "-------------------------------------------------------------------------" << std::endl;
     cpu::get_both_cores();
     std::cout << "-------------------------------------------------------------------------" << std::endl;
-    cpu::instruction_set_checker();
     cpu::print_instructions();
     std::cout << "-------------------------------------------------------------------------" << std::endl;
     std::cout << "Cube version: " << cube::version() << std::endl;

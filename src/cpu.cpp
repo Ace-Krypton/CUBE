@@ -100,7 +100,7 @@ auto cpu::format_SI(double interval, int width, char unit) -> std::string {
  * \code __rdtsc() function
  * @return value returned from cpu after instruction
  */
-inline auto cpu::read_cycle_count()-> uint64_t {
+inline auto cpu::read_cycle_count()-> std::uint64_t {
     return __rdtsc();
 }
 
@@ -111,7 +111,7 @@ inline auto cpu::read_cycle_count()-> uint64_t {
  */
 auto cpu::measure_TSC_tick() -> double {
     std::chrono::time_point start = std::chrono::steady_clock::now();
-    uint64_t start_tick = cpu::read_cycle_count();
+    std::uint64_t start_tick = cpu::read_cycle_count();
     std::chrono::time_point end = start + std::chrono::milliseconds(0x5);
     while (std::chrono::steady_clock::now() < end) { }
     size_t elapsed = cpu::read_cycle_count() - start_tick;
@@ -195,6 +195,7 @@ auto cpu::extract_leaf_15H(double * time) -> bool {
            cpu::leaf_extract[0x0],
            cpu::leaf_extract[0x1],
            cpu::leaf_extract[0x2],
+
            cpu::format_SI(*time, 0x9, 's').c_str());
     return true;
 }
@@ -206,20 +207,19 @@ auto cpu::extract_leaf_15H(double * time) -> bool {
  */
 auto cpu::read_HW_tick_from_name(double * time) -> bool {
     std::string model_name = cpu::vendor_id();
-    
+
     if (model_name.find("Apple") != std::string::npos) return false;
 
     char const * model = model_name.c_str();
-    auto end = model + std::strlen(model) - 0x3;
-    uint64_t multiplier;
-
+    char const * end = model + std::strlen(model) - 0x3;
+    std::uint64_t multiplier;
     if (*end == 'M') multiplier = 1000LL * 1000LL;
     else if (*end == 'G') multiplier = 1000LL * 1000LL * 1000LL;
     else if (*end == 'T') multiplier = 1000LL * 1000LL * 1000LL * 1000LL;
     else return false;
-    
+
     while (*end != ' ' && end >= model) end--;
-    
+
     char * uninteresting;
     double freq = strtod(end + 0x1, &uninteresting);
     
@@ -245,20 +245,20 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
  * \brief Check whether the clock actually ticks at the same rate as its value is enumerated in
  * @return delta variable
  */
-auto cpu::measure_clock_granularity() -> uint64_t {
-    uint64_t delta = std::numeric_limits<uint64_t>::max();
+auto cpu::measure_clock_granularity() -> std::uint64_t {
+    std::uint64_t delta = std::numeric_limits<std::uint64_t>::max();
 
     for (size_t i = 0x0; i < 0x32; ++i) {
-        uint64_t m1 = cpu::read_cycle_count();
-        uint64_t m2 = cpu::read_cycle_count();
-        uint64_t m3 = cpu::read_cycle_count();
-        uint64_t m4 = cpu::read_cycle_count();
-        uint64_t m5 = cpu::read_cycle_count();
-        uint64_t m6 = cpu::read_cycle_count();
-        uint64_t m7 = cpu::read_cycle_count();
-        uint64_t m8 = cpu::read_cycle_count();
-        uint64_t m9 = cpu::read_cycle_count();
-        uint64_t m10 = cpu::read_cycle_count();
+        std::uint64_t m1 = cpu::read_cycle_count();
+        std::uint64_t m2 = cpu::read_cycle_count();
+        std::uint64_t m3 = cpu::read_cycle_count();
+        std::uint64_t m4 = cpu::read_cycle_count();
+        std::uint64_t m5 = cpu::read_cycle_count();
+        std::uint64_t m6 = cpu::read_cycle_count();
+        std::uint64_t m7 = cpu::read_cycle_count();
+        std::uint64_t m8 = cpu::read_cycle_count();
+        std::uint64_t m9 = cpu::read_cycle_count();
+        std::uint64_t m10 = cpu::read_cycle_count();
 
         size_t d = (m2 - m1);
 
@@ -349,17 +349,69 @@ auto cpu::instruction_set_checker() -> void {
     __asm__("mov %%ecx, %0\n\t":"=r" (cpu::instruction_detection[0x0]));
     __asm__("mov %%edx, %0\n\t":"=r" (cpu::instruction_detection[0x1]));
 
-    instruction_set::has_fpu = (cpu::instruction_detection[0x1] & (0x1 << 0x0)) != 0x0;
-    instruction_set::has_mmx = (cpu::instruction_detection[0x1] & (0x1 << 0x17)) != 0x0;
-    instruction_set::has_sse = (cpu::instruction_detection[0x1] & (0x1 << 0x19)) != 0x0;
-    instruction_set::has_sse3 = (cpu::instruction_detection[0x0] & (0x1 << 0x0)) != 0x0;
-    instruction_set::has_avx = (cpu::instruction_detection[0x0] & (0x1 << 0x1C)) != 0x0;
-    instruction_set::has_sse2 = (cpu::instruction_detection[0x1] & (0x1 << 0x1A)) != 0x0;
-    instruction_set::has_ssse3 = (cpu::instruction_detection[0x0] & (0x1 << 0x9)) != 0x0;
-    instruction_set::has_f16c = (cpu::instruction_detection[0x0] & (0x1 << 0x1D)) != 0x0;
-    instruction_set::has_sse4_1 = (cpu::instruction_detection[0x0] & (0x1 << 0x13)) != 0x0;
-    instruction_set::has_sse4_2 = (cpu::instruction_detection[0x0] & (0x1 << 0x14)) != 0x0;
-    instruction_set::has_pclmulqdq = (cpu::instruction_detection[0x0] & (0x1 << 0x1)) != 0x0;
+    instruction_set::instructions["SSE3"] = (cpu::instruction_detection[0x0] & (0x1 << 0x0)) != 0x0;
+    instruction_set::instructions["PCLMUL"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1)) != 0x0;
+    instruction_set::instructions["DTES64"] = (cpu::instruction_detection[0x0] & (0x1 << 0x2)) != 0x0;
+    instruction_set::instructions["MONITOR"] = (cpu::instruction_detection[0x0] & (0x1 << 0x3)) != 0x0;
+    instruction_set::instructions["DS_CPL"] = (cpu::instruction_detection[0x0] & (0x1 << 0x4)) != 0x0;
+    instruction_set::instructions["VMX"] = (cpu::instruction_detection[0x0] & (0x1 << 0x5)) != 0x0;
+    instruction_set::instructions["SMX"] = (cpu::instruction_detection[0x0] & (0x1 << 0x6)) != 0x0;
+    instruction_set::instructions["EST"] = (cpu::instruction_detection[0x0] & (0x1 << 0x7)) != 0x0;
+    instruction_set::instructions["TM2"] = (cpu::instruction_detection[0x0] & (0x1 << 0x8)) != 0x0;
+    instruction_set::instructions["SSSE3"] = (cpu::instruction_detection[0x0] & (0x1 << 0x9)) != 0x0;
+    instruction_set::instructions["CID"] = (cpu::instruction_detection[0x0] & (0x1 << 0xA)) != 0x0;
+    instruction_set::instructions["SDBG"] = (cpu::instruction_detection[0x0] & (0x1 << 0xB)) != 0x0;
+    instruction_set::instructions["FMA"] = (cpu::instruction_detection[0x0] & (0x1 << 0xC)) != 0x0;
+    instruction_set::instructions["CX16"] = (cpu::instruction_detection[0x0] & (0x1 << 0xD)) != 0x0;
+    instruction_set::instructions["XTPR"] = (cpu::instruction_detection[0x0] & (0x1 << 0xE)) != 0x0;
+    instruction_set::instructions["PDCM"] = (cpu::instruction_detection[0x0] & (0x1 << 0xF)) != 0x0;
+    instruction_set::instructions["PCID"] = (cpu::instruction_detection[0x0] & (0x1 << 0x11)) != 0x0;
+    instruction_set::instructions["DCA"] = (cpu::instruction_detection[0x0] & (0x1 << 0x12)) != 0x0;
+    instruction_set::instructions["SSE4_1"] = (cpu::instruction_detection[0x0] & (0x1 << 0x13)) != 0x0;
+    instruction_set::instructions["SSE4_2"] = (cpu::instruction_detection[0x0] & (0x1 << 0x14)) != 0x0;
+    instruction_set::instructions["X2APIC"] = (cpu::instruction_detection[0x0] & (0x1 << 0x15)) != 0x0;
+    instruction_set::instructions["MOVBE"] = (cpu::instruction_detection[0x0] & (0x1 << 0x16)) != 0x0;
+    instruction_set::instructions["POPCNT"] = (cpu::instruction_detection[0x0] & (0x1 << 0x17)) != 0x0;
+    instruction_set::instructions["TSC"] = (cpu::instruction_detection[0x0] & (0x1 << 0x18)) != 0x0;
+    instruction_set::instructions["AES"] = (cpu::instruction_detection[0x0] & (0x1 << 0x19)) != 0x0;
+    instruction_set::instructions["XSAVE"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1A)) != 0x0;
+    instruction_set::instructions["OSXSAVE"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1B)) != 0x0;
+    instruction_set::instructions["AVX"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1C)) != 0x0;
+    instruction_set::instructions["F16C"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1D)) != 0x0;
+    instruction_set::instructions["RDRAND"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1E)) != 0x0;
+    instruction_set::instructions["Hyper-Visor"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1F)) != 0x0;
+
+    instruction_set::instructions["FPU"] = (cpu::instruction_detection[0x1] & (0x1 << 0x0)) != 0x0;
+    instruction_set::instructions["VME"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1)) != 0x0;
+    instruction_set::instructions["DE"] = (cpu::instruction_detection[0x1] & (0x1 << 0x2)) != 0x0;
+    instruction_set::instructions["PSE"] = (cpu::instruction_detection[0x1] & (0x1 << 0x3)) != 0x0;
+    instruction_set::instructions["MSR"] = (cpu::instruction_detection[0x1] & (0x1 << 0x5)) != 0x0;
+    instruction_set::instructions["PAE"] = (cpu::instruction_detection[0x1] & (0x1 << 0x6)) != 0x0;
+    instruction_set::instructions["MCE"] = (cpu::instruction_detection[0x1] & (0x1 << 0x7)) != 0x0;
+    instruction_set::instructions["CX8"] = (cpu::instruction_detection[0x1] & (0x1 << 0x8)) != 0x0;
+    instruction_set::instructions["APIC"] = (cpu::instruction_detection[0x1] & (0x1 << 0x9)) != 0x0;
+    instruction_set::instructions["SEP"] = (cpu::instruction_detection[0x1] & (0x1 << 0xB)) != 0x0;
+    instruction_set::instructions["MTRR"] = (cpu::instruction_detection[0x1] & (0x1 << 0xC)) != 0x0;
+    instruction_set::instructions["PGE"] = (cpu::instruction_detection[0x1] & (0x1 << 0xD)) != 0x0;
+    instruction_set::instructions["MCA"] = (cpu::instruction_detection[0x1] & (0x1 << 0xE)) != 0x0;
+    instruction_set::instructions["CMOV"] = (cpu::instruction_detection[0x1] & (0x1 << 0xF)) != 0x0;
+    instruction_set::instructions["PAT"] = (cpu::instruction_detection[0x1] & (0x1 << 0x10)) != 0x0;
+    instruction_set::instructions["PSE36"] = (cpu::instruction_detection[0x1] & (0x1 << 0x11)) != 0x0;
+    instruction_set::instructions["PSN"] = (cpu::instruction_detection[0x1] & (0x1 << 0x12)) != 0x0;
+    instruction_set::instructions["CLFLUSH"] = (cpu::instruction_detection[0x1] & (0x1 << 0x13)) != 0x0;
+    instruction_set::instructions["DS"] = (cpu::instruction_detection[0x1] & (0x1 << 0x13)) != 0x0;
+    instruction_set::instructions["DS"] = (cpu::instruction_detection[0x1] & (0x1 << 0x15)) != 0x0;
+    instruction_set::instructions["ACPI"] = (cpu::instruction_detection[0x1] & (0x1 << 0x16)) != 0x0;
+    instruction_set::instructions["MMX"] = (cpu::instruction_detection[0x1] & (0x1 << 0x17)) != 0x0;
+    instruction_set::instructions["FXSR"] = (cpu::instruction_detection[0x1] & (0x1 << 0x18)) != 0x0;
+    instruction_set::instructions["SSE"] = (cpu::instruction_detection[0x1] & (0x1 << 0x19)) != 0x0;
+    instruction_set::instructions["SSE2"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1A)) != 0x0;
+    instruction_set::instructions["SS"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1B)) != 0x0;
+    instruction_set::instructions["HTT"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1C)) != 0x0;
+    instruction_set::instructions["TM"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1D)) != 0x0;
+    instruction_set::instructions["IA64"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1E)) != 0x0;
+    instruction_set::instructions["PBE"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1F)) != 0x0;
+
 #endif
 }
 
@@ -367,18 +419,12 @@ auto cpu::instruction_set_checker() -> void {
  * \brief Prints instructions from instruction set
  */
 auto cpu::print_instructions() -> void {
+
     std::cout << std::boolalpha;
-    std::cout << "Has FPU -> " << instruction_set::has_fpu << std::endl;
-    std::cout << "Has MMX -> " << instruction_set::has_mmx << std::endl;
-    std::cout << "Has SSE -> " << instruction_set::has_sse << std::endl;
-    std::cout << "Has AVX -> " << instruction_set::has_avx << std::endl;
-    std::cout << "Has F16C -> " << instruction_set::has_f16c << std::endl;
-    std::cout << "Has SSE3 -> " << instruction_set::has_sse3 << std::endl;
-    std::cout << "Has SSE2 -> " << instruction_set::has_sse2 << std::endl;
-    std::cout << "Has SSSE3 -> " << instruction_set::has_ssse3 << std::endl;
-    std::cout << "Has SSE4_1 -> " << instruction_set::has_sse4_1 << std::endl;
-    std::cout << "Has SSE4_2 -> " << instruction_set::has_sse4_2 << std::endl;
-    std::cout << "Has PCLMULQDQ -> " << instruction_set::has_pclmulqdq << std::endl;
+    cpu::instruction_set_checker();
+    for (auto const & element : instruction_set::instructions) {
+        std::cout << element.first << " " << element.second << std::endl;
+    }
 }
 
 /**

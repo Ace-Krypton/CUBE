@@ -7,19 +7,10 @@
 #ifndef CUBE_CPU_HPP
 #define CUBE_CPU_HPP
 #define CPU_INFO "/proc/cpuinfo/"
+#include <unordered_map>
 
 struct instruction_set {
-    static inline bool has_fpu = false;
-    static inline bool has_mmx = false;
-    static inline bool has_sse = false;
-    static inline bool has_avx = false;
-    static inline bool has_sse2 = false;
-    static inline bool has_f16c = false;
-    static inline bool has_sse3 = false;
-    static inline bool has_ssse3 = false;
-    static inline bool has_sse4_2 = false;
-    static inline bool has_sse4_1 = false;
-    static inline bool has_pclmulqdq = false;
+    static inline std::unordered_map<std::string, bool> instructions;
 };
 
 class cpu {
@@ -38,8 +29,8 @@ public:
     static auto measure_TSC_tick() -> double;
     static auto supports_invariantTSC() -> bool;
     static auto instruction_set_checker() -> void;
-    static inline auto read_cycle_count()-> uint64_t;
-    static auto measure_clock_granularity() -> uint64_t;
+    static inline auto read_cycle_count()-> std::uint64_t;
+    static auto measure_clock_granularity() -> std::uint64_t;
     static auto extract_leaf_15H(double * time) -> bool;
     static auto model_name(std::uint32_t eax_values) -> void;
     static auto read_HW_tick_from_name(double * time) -> bool;
