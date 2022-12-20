@@ -429,13 +429,13 @@ auto cpu::print_instructions() -> void {
 
         std::cout << " [ " << elements.first;
         switch (elements.first.size()) {
-            case 2: std::cout << "          "; break;
-            case 3: std::cout << "         "; break;
-            case 4: std::cout << "        "; break;
-            case 5: std::cout << "       "; break;
-            case 6: std::cout << "      "; break;
-            case 7: std::cout << "     "; break;
-            case 11: std::cout << " "; break;
+            case 0x2: std::cout << "          "; break;
+            case 0x3: std::cout << "         "; break;
+            case 0x4: std::cout << "        "; break;
+            case 0x5: std::cout << "       "; break;
+            case 0x6: std::cout << "      "; break;
+            case 0x7: std::cout << "     "; break;
+            case 0xB: std::cout << " "; break;
         }
         std::cout << ((elements.second) ? "[Y] ]" : "[N] ]");
         counter++;

@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <vector>
+#include <ncurses.h>
 #include <fstream>
 #include <unistd.h>
 #include <filesystem>
@@ -74,8 +75,12 @@ auto distro_display() -> std::string {
 auto main(int argc, const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
     std::cout << "-------------------------------------------------------------------------" << std::endl;
+    initscr();  //Initialize memory
+    printw("Hello World");
+    refresh();
+    getch();
 
-    std::cout << "-------------------------------------------------------------------------" << std::endl;
+    /*std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
 
     printf("Invariant TSC: %s\n", invariant ? "True" : "False");
@@ -131,7 +136,7 @@ auto main(int argc, const char* argv[]) -> int {
     std::cout << physmem_available() << std::endl;
     std::cout << "-------------------------------------------------------------------------" << std::endl;
 
-    /*  ---------------------------------------------------------------------------------  */
+    *//*  ---------------------------------------------------------------------------------  */
 
     for (std::size_t i { 0x1 }; i < argc; ++i) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
@@ -152,6 +157,7 @@ auto main(int argc, const char* argv[]) -> int {
             return 0x1;
         }
     }
+    endwin(); //deallocate the memory
     return 0x0;
 
     /*  ---------------------------------------------------------------------------------  */
