@@ -25,6 +25,8 @@
  * 6. Storage
  * 7. RAM percentage
  * 8. CPU information */
+
+typedef long long ll;
 #define RELEASE "/etc/os-release/"
 
 static std::string base_path = "/sys/class/power_supply/";
@@ -75,43 +77,40 @@ auto distro_display() -> std::string {
 }
 
 auto cpu_percentage() -> void {
-    // Initialize variables to store the clock speed and elapsed time
-    int clockSpeed;
-    long long elapsedTime;
+    std::ifstream stat_file("/proc/stat");
+    std::string line;
+    std::getline(stat_file, line);
 
-    // Save the current clock speed of the CPU
-    unsigned long long MSRValue;
-    __asm__ __volatile__("rdmsr" : "=A"(MSRValue) : "c"(0x198)); // IA32_PERF_CTL MSR
-    int currentClockSpeed = (int)(MSRValue & 0xFFFFFFFF);
-    std::cout << currentClockSpeed << std::endl;
+    std::istringstream iss(line);
+    std::string token;
+    iss >> token;
 
-    // Set the clock speed of the CPU to a constant value
-    int newClockSpeed = 1000; // 1000 MHz
-    MSRValue &= ~0xFFFFFFFF;
-    MSRValue |= newClockSpeed;
-    __asm__ __volatile__("wrmsr" : : "c"(0x198), "A"(MSRValue)); // IA32_PERF_CTL MSR
+    ll user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0, steal = 0, guest = 0, guest_nice = 0;
+    iss >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guest_nice;
 
-    // Get the clock speed of the CPU
-    clockSpeed = newClockSpeed;
+    ll total_time = user + nice + system + idle + iowait + irq + softirq + steal;
+    ll idle_time = idle + iowait;
 
-    // Measure the elapsed time
-    long long startTime = 0;
-    __asm__ __volatile__("rdtsc" : "=A"(startTime));
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    long long endTime = 0;
-    __asm__ __volatile__("rdtsc" : "=A"(endTime));
-    elapsedTime = endTime - startTime;
+    stat_file.close();
 
-    // Calculate the CPU usage percentage
-    double usagePercentage = 100.0 * (double)elapsedTime / (double)(clockSpeed * 1000);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    // Print the CPU usage percentage
-    std::cout << "CPU usage: " << usagePercentage << "%" << std::endl;
+    stat_file.open("/proc/stat");
+    std::getline(stat_file, line);
 
-    // Restore the original clock speed of the CPU
-    MSRValue &= ~0xFFFFFFFF;
-    MSRValue |= currentClockSpeed;
-    __asm__ __volatile__("wrmsr" : : "c"(0x198), "A"(MSRValue)); // IA32_PERF_CTL MSR
+    std::istringstream iss2(line);
+    iss2 >> token;
+    iss2 >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guest_nice;
+
+    ll total_time_2 = user + nice + system + idle + iowait + irq + softirq + steal;
+    ll idle_time_2 = idle + iowait;
+
+    stat_file.close();
+
+    double usage = (double)(total_time_2 - total_time - (idle_time_2 - idle_time))
+            / (double)(total_time_2 - total_time) * 100;
+
+    std::cout << "CPU usage: " << usage << "%\n";
 }
 
 /*auto write_console(WINDOW * win) -> void {
