@@ -28,6 +28,7 @@
 
 typedef long long ll;
 #define RELEASE "/etc/os-release/"
+#define CPU_STAT "/proc/stat"
 
 static std::string base_path = "/sys/class/power_supply/";
 
@@ -76,8 +77,23 @@ auto distro_display() -> std::string {
     return (name.empty()) ? std::string() : name;
 }
 
-auto cpu_percentage() -> void {
-    std::ifstream stat_file("/proc/stat");
+auto progress_bar(const std::string& percent) -> std::string {
+    std::string result = "CPU [";
+    uint64_t _size = 50;
+
+    uint64_t boundaries = (uint64_t)(stof(percent) / 100) * _size;
+
+    for (size_t i = 0; i < _size; ++i){
+        if (i <= boundaries) result += "|";
+        else result += " ";
+    }
+
+    result += percent + "]";
+    return result;
+}
+
+auto cpu_percentage() -> std::string {
+    std::ifstream stat_file(CPU_STAT);
     std::string line;
     std::getline(stat_file, line);
 
@@ -95,7 +111,7 @@ auto cpu_percentage() -> void {
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    stat_file.open("/proc/stat");
+    stat_file.open(CPU_STAT);
     std::getline(stat_file, line);
 
     std::istringstream iss2(line);
@@ -110,35 +126,36 @@ auto cpu_percentage() -> void {
     double usage = (double)(total_time_2 - total_time - (idle_time_2 - idle_time))
             / (double)(total_time_2 - total_time) * 100;
 
-    std::cout << "CPU usage: " << usage << "%\n";
+    return std::to_string(usage);
 }
 
-/*auto write_console(WINDOW * win) -> void {
+auto write_console(WINDOW * win) -> void {
     mvwprintw(win, 2, 2, "%s", distro_display().c_str());
-    mvwprintw(win, 3, 2, "%s", reinterpret_cast<const char *>(physmem_available()));
-    mvwprintw(win, 4, 2, "%s", reinterpret_cast<const char *>(physmem_total()));
     wattron(win,COLOR_PAIR(1));
-    wprintw(win,getCString(Util::getProgressBar(sys.getCpuPercent())));
-    wattroff(win,COLOR_PAIR(1));
-    mvwprintw(win,5,2,getCString(( "Other cores:")));
-    wattron(win,COLOR_PAIR(1));
-    std::vector<std::string> val = sys.getCoresStats();
-    for (int i = 0; i < val.size(); i++) {
-        mvwprintw(win,(6+i),2,getCString(val[i]));
-    }
-    wattroff(win,COLOR_PAIR(1));
-    mvwprintw(win,10,2,getCString(( "Memory: ")));
-    wattron(win,COLOR_PAIR(1));
-    wprintw(win,getCString(Util::getProgressBar(sys.getMemPercent())));
-    wattroff(win,COLOR_PAIR(1));
-    mvwprintw(win,11,2,getCString(( "Total Processes:" + sys.getTotalProc())));
-    mvwprintw(win,12,2,getCString(( "Running Processes:" + sys.getRunningProc())));
-    mvwprintw(win,13,2,getCString(( "Up Time: " + Util::convertToTime(sys.getUpTime()))));
-}*/
+    wprintw(win, "%s", (progress_bar(cpu_percentage())).c_str());
+}
 
 auto main(int argc, const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
-    cpu_percentage();
+    initscr();
+    noecho();
+    cbreak();
+    start_color();
+    int yMax,xMax;
+    getmaxyx(stdscr,yMax,xMax);
+    WINDOW * sys_win = newwin(17,xMax-1,0,0);
+    init_pair(1,COLOR_BLUE,COLOR_BLACK);
+    init_pair(2,COLOR_GREEN,COLOR_BLACK);
+    keypad(sys_win, TRUE);
+
+    while (true) {
+        box(sys_win,0,0);
+        write_console(sys_win);
+        wrefresh(sys_win);
+        refresh();
+    }
+    endwin();
+
 /*    std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
 
@@ -215,7 +232,6 @@ auto main(int argc, const char* argv[]) -> int {
             return 0x1;
         }
     }
-    endwin();
     return 0x0;
 
     /*  ---------------------------------------------------------------------------------  */
