@@ -79,16 +79,16 @@ auto distro_display() -> std::string {
 
 auto progress_bar(const std::string& percent) -> std::string {
     std::string result = "CPU [";
-    uint64_t _size = 50;
+    int _size = 0x32;
 
-    uint64_t boundaries = (uint64_t)(stof(percent) / 100) * _size;
+    int boundaries = static_cast<int>((std::stof(percent) / 0x64) * static_cast<float>(_size));
 
-    for (size_t i = 0; i < _size; ++i){
+    for (size_t i = 0x0; i < _size; ++i){
         if (i <= boundaries) result += "|";
         else result += " ";
     }
 
-    result += percent + "]";
+    result += percent.substr(0x0, 0x4) + "%]";
     return result;
 }
 
@@ -101,7 +101,8 @@ auto cpu_percentage() -> std::string {
     std::string token;
     iss >> token;
 
-    ll user = 0, nice = 0, system = 0, idle = 0, iowait = 0, irq = 0, softirq = 0, steal = 0, guest = 0, guest_nice = 0;
+    ll user = 0x0, nice = 0x0, system = 0x0, idle = 0x0, iowait = 0x0, irq = 0x0,
+        softirq = 0x0, steal = 0x0, guest = 0x0, guest_nice = 0x0;
     iss >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guest_nice;
 
     ll total_time = user + nice + system + idle + iowait + irq + softirq + steal;
@@ -109,7 +110,7 @@ auto cpu_percentage() -> std::string {
 
     stat_file.close();
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(0x1));
 
     stat_file.open(CPU_STAT);
     std::getline(stat_file, line);
@@ -124,14 +125,15 @@ auto cpu_percentage() -> std::string {
     stat_file.close();
 
     double usage = (double)(total_time_2 - total_time - (idle_time_2 - idle_time))
-            / (double)(total_time_2 - total_time) * 100;
+            / (double)(total_time_2 - total_time) * 0x64;
 
     return std::to_string(usage);
 }
 
 auto write_console(WINDOW * win) -> void {
-    mvwprintw(win, 2, 2, "%s", distro_display().c_str());
-    wattron(win,COLOR_PAIR(1));
+    mvwprintw(win, 0x2, 0x2, "%s", distro_display().c_str());
+    wattron(win,COLOR_PAIR(0x1));
+    wattron(win, A_BOLD);
     wprintw(win, "%s", (progress_bar(cpu_percentage())).c_str());
 }
 
@@ -141,18 +143,19 @@ auto main(int argc, const char* argv[]) -> int {
     noecho();
     cbreak();
     start_color();
-    int yMax,xMax;
-    getmaxyx(stdscr,yMax,xMax);
-    WINDOW * sys_win = newwin(17,xMax-1,0,0);
-    init_pair(1,COLOR_BLUE,COLOR_BLACK);
-    init_pair(2,COLOR_GREEN,COLOR_BLACK);
+    int yMax, xMax;
+    getmaxyx(stdscr, yMax, xMax);
+    WINDOW * sys_win = newwin(0x11, xMax - 0x1, 0x0, 0x0);
+    init_pair(0x1, COLOR_GREEN, COLOR_BLACK);
+    init_pair(0x2, COLOR_GREEN, COLOR_BLACK);
     keypad(sys_win, TRUE);
 
     while (true) {
-        box(sys_win,0,0);
+        box(sys_win, 0x0, 0x0);
         write_console(sys_win);
         wrefresh(sys_win);
         refresh();
+        std::this_thread::sleep_for(std::chrono::seconds(0x1));
     }
     endwin();
 
