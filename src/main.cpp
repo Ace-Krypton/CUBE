@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <filesystem>
 #include <experimental/string_view>
+#include <cstring>
+#include <thread>
 
 #include "cpu.hpp"
 #include "version.hpp"
@@ -72,15 +74,73 @@ auto distro_display() -> std::string {
     return (name.empty()) ? std::string() : name;
 }
 
+auto cpu_percentage() -> void {
+    // Initialize variables to store the clock speed and elapsed time
+    int clockSpeed;
+    long long elapsedTime;
+
+    // Save the current clock speed of the CPU
+    unsigned long long MSRValue;
+    __asm__ __volatile__("rdmsr" : "=A"(MSRValue) : "c"(0x198)); // IA32_PERF_CTL MSR
+    int currentClockSpeed = (int)(MSRValue & 0xFFFFFFFF);
+    std::cout << currentClockSpeed << std::endl;
+
+    // Set the clock speed of the CPU to a constant value
+    int newClockSpeed = 1000; // 1000 MHz
+    MSRValue &= ~0xFFFFFFFF;
+    MSRValue |= newClockSpeed;
+    __asm__ __volatile__("wrmsr" : : "c"(0x198), "A"(MSRValue)); // IA32_PERF_CTL MSR
+
+    // Get the clock speed of the CPU
+    clockSpeed = newClockSpeed;
+
+    // Measure the elapsed time
+    long long startTime = 0;
+    __asm__ __volatile__("rdtsc" : "=A"(startTime));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    long long endTime = 0;
+    __asm__ __volatile__("rdtsc" : "=A"(endTime));
+    elapsedTime = endTime - startTime;
+
+    // Calculate the CPU usage percentage
+    double usagePercentage = 100.0 * (double)elapsedTime / (double)(clockSpeed * 1000);
+
+    // Print the CPU usage percentage
+    std::cout << "CPU usage: " << usagePercentage << "%" << std::endl;
+
+    // Restore the original clock speed of the CPU
+    MSRValue &= ~0xFFFFFFFF;
+    MSRValue |= currentClockSpeed;
+    __asm__ __volatile__("wrmsr" : : "c"(0x198), "A"(MSRValue)); // IA32_PERF_CTL MSR
+}
+
+/*auto write_console(WINDOW * win) -> void {
+    mvwprintw(win, 2, 2, "%s", distro_display().c_str());
+    mvwprintw(win, 3, 2, "%s", reinterpret_cast<const char *>(physmem_available()));
+    mvwprintw(win, 4, 2, "%s", reinterpret_cast<const char *>(physmem_total()));
+    wattron(win,COLOR_PAIR(1));
+    wprintw(win,getCString(Util::getProgressBar(sys.getCpuPercent())));
+    wattroff(win,COLOR_PAIR(1));
+    mvwprintw(win,5,2,getCString(( "Other cores:")));
+    wattron(win,COLOR_PAIR(1));
+    std::vector<std::string> val = sys.getCoresStats();
+    for (int i = 0; i < val.size(); i++) {
+        mvwprintw(win,(6+i),2,getCString(val[i]));
+    }
+    wattroff(win,COLOR_PAIR(1));
+    mvwprintw(win,10,2,getCString(( "Memory: ")));
+    wattron(win,COLOR_PAIR(1));
+    wprintw(win,getCString(Util::getProgressBar(sys.getMemPercent())));
+    wattroff(win,COLOR_PAIR(1));
+    mvwprintw(win,11,2,getCString(( "Total Processes:" + sys.getTotalProc())));
+    mvwprintw(win,12,2,getCString(( "Running Processes:" + sys.getRunningProc())));
+    mvwprintw(win,13,2,getCString(( "Up Time: " + Util::convertToTime(sys.getUpTime()))));
+}*/
+
 auto main(int argc, const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
-    std::cout << "-------------------------------------------------------------------------" << std::endl;
-    initscr();  //Initialize memory
-    printw("Hello World");
-    refresh();
-    getch();
-
-    /*std::cout << "-------------------------------------------------------------------------" << std::endl;
+    cpu_percentage();
+/*    std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
 
     printf("Invariant TSC: %s\n", invariant ? "True" : "False");
@@ -134,9 +194,8 @@ auto main(int argc, const char* argv[]) -> int {
     std::cout << "-------------------------------------------------------------------------" << std::endl;
     std::cout << physmem_total() << std::endl;
     std::cout << physmem_available() << std::endl;
-    std::cout << "-------------------------------------------------------------------------" << std::endl;
-
-    *//*  ---------------------------------------------------------------------------------  */
+    std::cout << "-------------------------------------------------------------------------" << std::endl;*/
+    //---------------------------------------------------------------------------------
 
     for (std::size_t i { 0x1 }; i < argc; ++i) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
@@ -157,7 +216,7 @@ auto main(int argc, const char* argv[]) -> int {
             return 0x1;
         }
     }
-    endwin(); //deallocate the memory
+    endwin();
     return 0x0;
 
     /*  ---------------------------------------------------------------------------------  */
