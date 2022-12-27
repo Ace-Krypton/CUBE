@@ -6,8 +6,13 @@
 #pragma once
 #ifndef CUBE_CPU_HPP
 #define CUBE_CPU_HPP
-#define CPU_INFO "/proc/cpuinfo/"
+
 #include <unordered_map>
+
+#define CPU_STAT "/proc/stat/"
+#define CPU_INFO "/proc/cpuinfo/"
+
+typedef long long ll;
 
 struct instruction_set {
     static inline std::unordered_map<std::string, bool> instructions;
@@ -28,6 +33,7 @@ public:
     static auto print_instructions() -> void;
     static auto measure_TSC_tick() -> double;
     static auto supports_invariantTSC() -> bool;
+    static auto cpu_percentage() -> std::string;
     static auto instruction_set_checker() -> void;
     static inline auto read_cycle_count()-> std::uint64_t;
     static auto measure_clock_granularity() -> std::uint64_t;

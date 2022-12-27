@@ -17,6 +17,8 @@
 #include <chrono>
 #include <iomanip>
 #include <cstring>
+#include <fstream>
+#include <thread>
 
 #include "architecture.hpp"
 
@@ -413,6 +415,44 @@ auto cpu::instruction_set_checker() -> void {
     instruction_set::instructions["PBE"] = (cpu::instruction_detection[0x1] & (0x1 << 0x1F)) != 0x0;
 
 #endif
+}
+
+auto cpu::cpu_percentage() -> std::string {
+    std::ifstream stat_file(CPU_STAT);
+    std::string line;
+    std::getline(stat_file, line);
+
+    std::istringstream iss(line);
+    std::string token;
+    iss >> token;
+
+    ll user = 0x0, nice = 0x0, system = 0x0, idle = 0x0, iowait = 0x0, irq = 0x0,
+            softirq = 0x0, steal = 0x0, guest = 0x0, guest_nice = 0x0;
+    iss >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guest_nice;
+
+    ll total_time = user + nice + system + idle + iowait + irq + softirq + steal;
+    ll idle_time = idle + iowait;
+
+    stat_file.close();
+
+    std::this_thread::sleep_for(std::chrono::seconds(0x1));
+
+    stat_file.open(CPU_STAT);
+    std::getline(stat_file, line);
+
+    std::istringstream iss2(line);
+    iss2 >> token;
+    iss2 >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal >> guest >> guest_nice;
+
+    ll total_time_2 = user + nice + system + idle + iowait + irq + softirq + steal;
+    ll idle_time_2 = idle + iowait;
+
+    stat_file.close();
+
+    double usage = (double)(total_time_2 - total_time - (idle_time_2 - idle_time))
+                   / (double)(total_time_2 - total_time) * 0x64;
+
+    return std::to_string(usage);
 }
 
 /**
