@@ -35,9 +35,9 @@ public:
     static auto supports_invariantTSC() -> bool;
     static auto cpu_percentage() -> std::string;
     static auto instruction_set_checker() -> void;
+    static auto extract_leaf_15H(double * time) -> bool;
     static inline auto read_cycle_count()-> std::uint64_t;
     static auto measure_clock_granularity() -> std::uint64_t;
-    static auto extract_leaf_15H(double * time) -> bool;
     static auto model_name(std::uint32_t eax_values) -> void;
     static auto read_HW_tick_from_name(double * time) -> bool;
     [[maybe_unused]] static auto read_HW_tick_time() -> double;

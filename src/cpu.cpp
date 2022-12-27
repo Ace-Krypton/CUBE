@@ -424,6 +424,7 @@ auto cpu::instruction_set_checker() -> void {
  */
 auto cpu::cpu_percentage() -> std::string {
     std::ifstream stat_file(CPU_STAT);
+    if (!stat_file.is_open()) cpu::fatal_error("Error: Failed to open /proc/stat");
     std::string line;
     std::getline(stat_file, line);
 

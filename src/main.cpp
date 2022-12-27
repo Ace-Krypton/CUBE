@@ -13,6 +13,7 @@
 
 #include "tui.hpp"
 #include "version.hpp"
+#include "cpu.hpp"
 
 /* TODO List
  * 1. Distro Display
@@ -24,7 +25,8 @@
  * 7. RAM percentage
  * 8. CPU information */
 
-#define RELEASE "/etc/os-release/"
+#define RELEASE "/etc/os-release"
+#define UPTIME "/proc/uptime"
 
 static std::string base_path = "/sys/class/power_supply/";
 
@@ -73,13 +75,33 @@ auto distro_display() -> std::string {
     return (name.empty()) ? std::string() : name;
 }
 
+auto uptime_display() -> void {
+    std::ifstream uptime_file(UPTIME);
+    if (!uptime_file.is_open()) cpu::fatal_error("Error: Failed to open /proc/uptime");
+
+    std::string line;
+    std::getline(uptime_file, line);
+    std::istringstream iss(line);
+    uint64_t uptime_seconds;
+    iss >> uptime_seconds;
+
+    uint64_t hours = uptime_seconds / 3600;
+    uint64_t minutes = (uptime_seconds / 60) % 60;
+    uint64_t seconds = uptime_seconds % 60;
+
+    std::cout << std::setw(2) << std::setfill('0') << hours << ":"
+              << std::setw(2) << std::setfill('0') << minutes << ":"
+              << std::setw(2) << std::setfill('0') << seconds << std::endl;
+}
+
 auto main(int argc, const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
-    initscr();
-    noecho();
-    cbreak();
-    tui::draw();
-    endwin();
+    uptime_display();
+//    initscr();
+//    noecho();
+//    cbreak();
+//    tui::draw();
+//    endwin();
 
     /*std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
