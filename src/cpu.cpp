@@ -12,13 +12,14 @@
  */
 
 #include <iostream>
-#include <x86intrin.h>
-#include <cstdarg>
 #include <chrono>
+#include <thread>
+#include <cstdarg>
 #include <iomanip>
 #include <cstring>
 #include <fstream>
-#include <thread>
+#include <filesystem>
+#include <x86intrin.h>
 
 #include "architecture.hpp"
 
@@ -417,6 +418,10 @@ auto cpu::instruction_set_checker() -> void {
 #endif
 }
 
+/**
+ * \brief Calculates the cpu usage from "/proc/cpuinfo" file
+ * @return CPU usage as string using std::to_string() method
+ */
 auto cpu::cpu_percentage() -> std::string {
     std::ifstream stat_file(CPU_STAT);
     std::string line;
