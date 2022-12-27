@@ -6,14 +6,12 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include <cstring>
 #include <unistd.h>
 #include <ncurses.h>
 #include <filesystem>
 #include <experimental/string_view>
 
 #include "tui.hpp"
-#include "cpu.hpp"
 #include "version.hpp"
 
 /* TODO List
@@ -82,7 +80,8 @@ auto main(int argc, const char* argv[]) -> int {
     cbreak();
     tui::draw();
     endwin();
-/*    std::cout << "-------------------------------------------------------------------------" << std::endl;
+
+    /*std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
 
     printf("Invariant TSC: %s\n", invariant ? "True" : "False");
@@ -138,8 +137,7 @@ auto main(int argc, const char* argv[]) -> int {
     std::cout << physmem_available() << std::endl;
     std::cout << "-------------------------------------------------------------------------" << std::endl;*/
     //---------------------------------------------------------------------------------
-
-    for (std::size_t i { 0x1 }; i < argc; ++i) {
+    /*for (std::size_t i { 0x1 }; i < argc; ++i) {
         if (std::experimental::string_view(argv[i]) == "--cpu") {
             cpu::vendor_id();
             cpu::get_cpu_id();
@@ -157,7 +155,8 @@ auto main(int argc, const char* argv[]) -> int {
             std::cout << "Invalid command line argument" << std::endl;
             return 0x1;
         }
-    }
+    }*/
+
     return 0x0;
 
     /*  ---------------------------------------------------------------------------------  */

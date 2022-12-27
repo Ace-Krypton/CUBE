@@ -9,8 +9,8 @@
 
 #include <unordered_map>
 
-#define CPU_STAT "/proc/stat/"
-#define CPU_INFO "/proc/cpuinfo/"
+#define CPU_STAT "/proc/stat"
+#define CPU_INFO "/proc/cpuinfo"
 
 typedef long long ll;
 
