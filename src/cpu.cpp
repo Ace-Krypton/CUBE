@@ -5,10 +5,8 @@
 
 /**
  * TODO List
- * 1. Getting number of physical and logical cores
- * 2. Getting clock speed (Max, Regular)
- * 3. Getting cache size
- * 4. Sockets?
+ * 1. Sockets
+ * 2. L1 and L2 cache size using CPUID
  */
 
 #include <iostream>
@@ -459,6 +457,20 @@ auto cpu::cpu_percentage() -> std::string {
                    / (double)(total_time_2 - total_time) * 0x64;
 
     return std::to_string(usage);
+}
+
+/**
+ * \brief Gets information about cache size (L1, L2, L3) from CPUID leaf 0x80000006H
+ * \attention For now it only finds the L2 cache size
+ *      and also it cannot calculate how many instances does the L2 has
+ */
+[[maybe_unused]] auto cpu::get_cache_info() -> void {
+    __asm__ __volatile__ ("mov $0x80000006, %eax\n\t");
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t" : "=r" (cpu::cache[0x2]));
+
+    std::uint32_t l2_cache_size = (cpu::cache[0x2] >> 0x10) & 0xffff;
+    std::cout << "L2 cache size: " << l2_cache_size << "KB" << std::endl;
 }
 
 /**

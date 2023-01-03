@@ -20,6 +20,7 @@ struct instruction_set {
 
 class cpu {
 public:
+    static inline std::uint32_t cache[0x4];
     static inline std::uint32_t leaf_extract[0x4];
     static inline std::uint32_t invariantTSC[0x4];
     static inline std::uint32_t vendor_output[0x3];
@@ -36,6 +37,7 @@ public:
     static auto cpu_percentage() -> std::string;
     static auto instruction_set_checker() -> void;
     static auto extract_leaf_15H(double * time) -> bool;
+    [[maybe_unused]] static auto get_cache_info() -> void;
     static inline auto read_cycle_count()-> std::uint64_t;
     static auto measure_clock_granularity() -> std::uint64_t;
     static auto model_name(std::uint32_t eax_values) -> void;
