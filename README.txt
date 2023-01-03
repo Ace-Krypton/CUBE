@@ -1,1 +1,19 @@
-CUBE is a command-line system information tool written in c++ 20. CUBE displays information about your operating system, software and hardware. Project's main goal is to have the most efficient system information tool available. I will add functionalities allowing user to add custom ASCII file, image and etc. Also I will add multi OS support in the near future. Project is still in development :)
+CUBE
+
+This C++ program displays information about the CPU using CPUID instructions with inline assembly. It also uses kernel modules for MSR instructions to display CPU usage and other utilities.
+
+Features
+
+    Display general information about the CPU
+    Display information about RAM and OS architecture
+    Display CPU usage
+
+Requirements
+
+    A C++ compiler
+    Kernel modules for MSR instructions
+
+Usage
+
+    Compile the program using your C++ compiler
+    Run the executable file
