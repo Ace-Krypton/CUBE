@@ -96,12 +96,11 @@ auto uptime_display() -> void {
 
 auto main(int argc, const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
-    uptime_display();
-//    initscr();
-//    noecho();
-//    cbreak();
-//    tui::draw();
-//    endwin();
+    initscr();
+    noecho();
+    cbreak();
+    tui::draw();
+    endwin();
 
     /*std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();

@@ -26,8 +26,8 @@ auto tui::progress_bar(const std::string& percent) -> std::string {
 }
 
 auto tui::write_console(WINDOW * win) -> void {
-    wattron(win,COLOR_PAIR(0x1));
     wattron(win, A_BOLD);
+    wattron(win, COLOR_PAIR(0x1));
     mvwprintw(win, 0x1, 0x3, "%s", (tui::progress_bar(cpu::cpu_percentage())).c_str());
 }
 
@@ -38,11 +38,10 @@ auto tui::write_console(WINDOW * win) -> void {
     getmaxyx(stdscr, yMax, xMax);
     WINDOW * sys_win = newwin(0x11, xMax - 0x1, 0x0, 0x0);
     init_pair(0x1, COLOR_GREEN, COLOR_BLACK);
-    init_pair(0x2, COLOR_GREEN, COLOR_BLACK);
-    keypad(sys_win, TRUE);
+    init_pair(0x2, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(0x3, COLOR_RED, COLOR_BLACK);
 
     while (true) {
-        box(sys_win, 0x0, 0x0);
         tui::write_console(sys_win);
         wrefresh(sys_win);
         refresh();
