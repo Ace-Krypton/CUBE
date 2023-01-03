@@ -96,10 +96,11 @@ auto uptime_display() -> void {
 
 auto main(int argc, const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
+    std::cout << cpu::print_thermal_state() << std::endl;
     initscr();
     noecho();
     cbreak();
-    tui::draw();
+    //tui::draw();
     endwin();
 
     /*std::cout << "-------------------------------------------------------------------------" << std::endl;

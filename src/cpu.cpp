@@ -17,6 +17,7 @@
 #include <cstring>
 #include <fstream>
 #include <filesystem>
+#include <sensors/sensors.h>
 #include <x86intrin.h>
 
 #include "architecture.hpp"
@@ -471,6 +472,35 @@ auto cpu::cpu_percentage() -> std::string {
 
     std::uint32_t l2_cache_size = (cpu::cache[0x2] >> 0x10) & 0xffff;
     std::cout << "L2 cache size: " << l2_cache_size << "KB" << std::endl;
+}
+
+/**
+ * \brief Prints the thermal sensor information for CPU using sensors library
+ * @return thermal state in Celsius
+ */
+auto cpu::print_thermal_state() -> double {
+    sensors_init(nullptr);
+
+    double _temp;
+    int nr = 0x0;
+    sensors_chip_name const* chip;
+
+    while ((chip = sensors_get_detected_chips(nullptr, &nr))) {
+        int nr_second = 0x0;
+        sensors_feature const * feature;
+
+        while ((feature = sensors_get_features(chip, &nr_second))) {
+            if (std::string(feature->name) == "temp1") {
+                double temp;
+                sensors_get_value(chip, feature->number, &temp);
+                _temp = temp;
+                break;
+            }
+        }
+    }
+
+    sensors_cleanup();
+    return _temp;
 }
 
 /**
