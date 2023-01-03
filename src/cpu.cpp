@@ -478,12 +478,12 @@ auto cpu::cpu_percentage() -> std::string {
  * \brief Prints the thermal sensor information for CPU using sensors library
  * @return thermal state in Celsius
  */
-auto cpu::print_thermal_state() -> double {
+auto cpu::print_thermal_state() -> std::string {
     sensors_init(nullptr);
 
     double _temp;
     int nr = 0x0;
-    sensors_chip_name const* chip;
+    sensors_chip_name const * chip;
 
     while ((chip = sensors_get_detected_chips(nullptr, &nr))) {
         int nr_second = 0x0;
@@ -500,7 +500,7 @@ auto cpu::print_thermal_state() -> double {
     }
 
     sensors_cleanup();
-    return _temp;
+    return std::to_string(_temp).substr(0x0, 0x2).append(" °C");
 }
 
 /**

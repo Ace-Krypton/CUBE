@@ -29,6 +29,8 @@ auto tui::write_console(WINDOW * win) -> void {
     wattron(win, A_BOLD);
     wattron(win, COLOR_PAIR(0x1));
     mvwprintw(win, 0x1, 0x3, "%s", (tui::progress_bar(cpu::cpu_percentage())).c_str());
+    wattron(win, COLOR_PAIR(0x3));
+    mvwprintw(win, 0x2, 0xF, "%s", (cpu::print_thermal_state()).c_str());
 }
 
 [[noreturn]] auto tui::draw() -> void {

@@ -34,9 +34,9 @@ public:
     static auto print_instructions() -> void;
     static auto measure_TSC_tick() -> double;
     static auto supports_invariantTSC() -> bool;
-    static auto print_thermal_state() -> double;
     static auto cpu_percentage() -> std::string;
     static auto instruction_set_checker() -> void;
+    static auto print_thermal_state() -> std::string;
     static auto extract_leaf_15H(double * time) -> bool;
     [[maybe_unused]] static auto get_cache_info() -> void;
     static inline auto read_cycle_count()-> std::uint64_t;
