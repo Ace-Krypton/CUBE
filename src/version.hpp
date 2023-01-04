@@ -10,7 +10,7 @@ namespace cube {
 #define CUBE_VERSION_STRING v1_0_0
 
     inline namespace CUBE_VERSION_STRING {
-        auto version() -> std::string;
+        [[maybe_unused]] auto version() -> std::string;
     }
 }
 

@@ -11,6 +11,10 @@
 
 #include "acpi.hpp"
 
+/**
+ * \brief Gets the information about battery vendors and counts
+ * @return Vendor names in vector (Can have multiple vendors)
+ */
 [[maybe_unused]] auto acpi::get_battery() -> std::vector<std::string> {
     std::string vendor { };
     std::uint16_t _id { 0x0 };

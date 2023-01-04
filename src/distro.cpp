@@ -8,6 +8,10 @@
 
 #include "distro.hpp"
 
+/**
+ * \brief Finds the Name of the Distro according to "/etc/os-release" file
+ * @return Name of the Linux Distro
+ */
 [[maybe_unused]] auto distro::distro_display() -> std::string {
     std::string pretty_name { "PRETTY_NAME=\"" }, name { };
     std::ifstream file { RELEASE };
