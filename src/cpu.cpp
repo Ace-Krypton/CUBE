@@ -241,7 +241,7 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
  * \brief Check whether the clock actually ticks at the same rate as its value is enumerated in
  * @return delta variable
  */
-auto cpu::measure_clock_granularity() -> std::uint64_t {
+[[maybe_unused]] auto cpu::measure_clock_granularity() -> std::uint64_t {
     std::uint64_t delta = std::numeric_limits<std::uint64_t>::max();
 
     for (size_t i = 0x0; i < 0x32; ++i) {
@@ -283,7 +283,7 @@ auto cpu::measure_clock_granularity() -> std::uint64_t {
  * \brief Gets the cpu core information both (Logical and Physical) from CPUID
  *             Also checks Hyper-Threading support
  */
-auto cpu::get_both_cores() -> void {
+[[maybe_unused]] auto cpu::get_both_cores() -> void {
     __asm__("mov $0x1, %eax\n\t");
     __asm__("cpuid\n\t");
     __asm__("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
@@ -500,7 +500,7 @@ auto cpu::print_thermal_state() -> std::string {
 /**
  * \brief Prints instructions from instruction set
  */
-auto cpu::print_instructions() -> void {
+[[maybe_unused]] auto cpu::print_instructions() -> void {
     std::uint64_t counter = 0x0;
     cpu::instruction_set_checker();
     for (auto const & elements : instruction_set::instructions) {
@@ -570,7 +570,7 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
  * \brief "xor %eax, %eax" is a faster way of setting eax to zero
  *        Also to avoid 0s when compiled as used on shell codes for exploitation of buffer overflows, etc
  */
-auto cpu::get_cpu_id() -> void {
+[[maybe_unused]] auto cpu::get_cpu_id() -> void {
 #if defined(X86)
     __asm__("xor %eax, %eax\n\t");
     __asm__("xor %ebx, %ebx\n\t");
