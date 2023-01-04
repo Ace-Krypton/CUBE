@@ -27,11 +27,11 @@
  */
 auto cpu::vendor_id() -> std::string {
 #if defined(X86)
-    __asm__("mov $0x0, %eax\n\t");
-    __asm__("cpuid\n\t");
-    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::vendor_output[0x0]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::vendor_output[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::vendor_output[0x2]));
+    __asm__ __volatile__ ("mov $0x0, %eax\n\t");
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::vendor_output[0x0]));
+    __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::vendor_output[0x1]));
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::vendor_output[0x2]));
 
     return std::string{ (const char *)cpu::vendor_output };
 #endif
@@ -133,12 +133,12 @@ auto cpu::measure_TSC_tick() -> double {
  * @return boolean value
  */
 auto cpu::supports_invariantTSC() -> bool {
-    __asm__("mov $0x80000007, %eax\n\t");
-    __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (cpu::invariantTSC[0x0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::invariantTSC[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::invariantTSC[0x2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::invariantTSC[0x3]));
+    __asm__ __volatile__ ("mov $0x80000007, %eax\n\t");
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::invariantTSC[0x0]));
+    __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::invariantTSC[0x1]));
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::invariantTSC[0x2]));
+    __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::invariantTSC[0x3]));
 
     return (cpu::invariantTSC[0x3] & (0x1 << 0x8)) != 0x0;
 }
@@ -154,29 +154,29 @@ auto cpu::supports_invariantTSC() -> bool {
  * @return boolean value
  */
 auto cpu::extract_leaf_15H(double * time) -> bool {
-    __asm__("mov $0x0, %eax\n\t");
-    __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (cpu::leaf_extract[0x0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::leaf_extract[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::leaf_extract[0x2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::leaf_extract[0x3]));
+    __asm__ __volatile__ ("mov $0x0, %eax\n\t");
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::leaf_extract[0x0]));
+    __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::leaf_extract[0x1]));
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::leaf_extract[0x2]));
+    __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::leaf_extract[0x3]));
 
     if (cpu::leaf_extract[0x0] < 0x15) {
         std::cout << "cpuid leaf 15H is not supported" << std::endl;
         return false;
     }
 
-    __asm__("xor %eax, %eax\n\t");
-    __asm__("xor %ebx, %ebx\n\t");
-    __asm__("xor %ecx, %ecx\n\t");
-    __asm__("xor %edx, %edx\n\t");
+    __asm__ __volatile__ ("xor %eax, %eax\n\t");
+    __asm__ __volatile__ ("xor %ebx, %ebx\n\t");
+    __asm__ __volatile__ ("xor %ecx, %ecx\n\t");
+    __asm__ __volatile__ ("xor %edx, %edx\n\t");
 
-    __asm__("mov $0x15, %eax\n\t");
-    __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (cpu::leaf_extract[0x0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::leaf_extract[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::leaf_extract[0x2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::leaf_extract[0x3]));
+    __asm__ __volatile__ ("mov $0x15, %eax\n\t");
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::leaf_extract[0x0]));
+    __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::leaf_extract[0x1]));
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::leaf_extract[0x2]));
+    __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::leaf_extract[0x3]));
 
     if (cpu::leaf_extract[0x1] == 0x0 || cpu::leaf_extract[0x2] == 0x0) {
         std::cout << "cpuid leaf 15H does not give frequency" << std::endl;
@@ -284,12 +284,12 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
  *             Also checks Hyper-Threading support
  */
 [[maybe_unused]] auto cpu::get_both_cores() -> void {
-    __asm__("mov $0x1, %eax\n\t");
-    __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
+    __asm__ __volatile__ ("mov $0x1, %eax\n\t");
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
+    __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
+    __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
 
     std::uint32_t cpu_features = cpu::cores_register[0x3];
     std::uint32_t logical_cores = (cpu::cores_register[0x1] >> 0x10) & 0xff;
@@ -297,32 +297,32 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
     std::uint32_t physical_cores = logical_cores;
 
     if (cpu::vendor_id() == "GenuineIntel") {
-        __asm__("xor %eax, %eax\n\t");
-        __asm__("xor %ebx, %ebx\n\t");
-        __asm__("xor %ecx, %ecx\n\t");
-        __asm__("xor %edx, %edx\n\t");
+        __asm__ __volatile__ ("xor %eax, %eax\n\t");
+        __asm__ __volatile__ ("xor %ebx, %ebx\n\t");
+        __asm__ __volatile__ ("xor %ecx, %ecx\n\t");
+        __asm__ __volatile__ ("xor %edx, %edx\n\t");
 
-        __asm__("mov $0x4, %eax\n\t");
-        __asm__("cpuid\n\t");
-        __asm__("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
-        __asm__("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
-        __asm__("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
-        __asm__("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
+        __asm__ __volatile__ ("mov $0x4, %eax\n\t");
+        __asm__ __volatile__ ("cpuid\n\t");
+        __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
+        __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
+        __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
+        __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
 
         physical_cores = ((std::uint32_t)(cpu::cores_register[0x0] >> 0x1A) & 0x3f) + 0x1;
 
     } else if (cpu::vendor_id() == "AuthenticAMD") {
-        __asm__("xor %eax, %eax\n\t");
-        __asm__("xor %ebx, %ebx\n\t");
-        __asm__("xor %ecx, %ecx\n\t");
-        __asm__("xor %edx, %edx\n\t");
+        __asm__ __volatile__ ("xor %eax, %eax\n\t");
+        __asm__ __volatile__ ("xor %ebx, %ebx\n\t");
+        __asm__ __volatile__ ("xor %ecx, %ecx\n\t");
+        __asm__ __volatile__ ("xor %edx, %edx\n\t");
 
-        __asm__("mov $0x80000008, %eax\n\t");
-        __asm__("cpuid\n\t");
-        __asm__("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
-        __asm__("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
-        __asm__("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
-        __asm__("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
+        __asm__ __volatile__ ("mov $0x80000008, %eax\n\t");
+        __asm__ __volatile__ ("cpuid\n\t");
+        __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::cores_register[0x0]));
+        __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::cores_register[0x1]));
+        __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::cores_register[0x2]));
+        __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::cores_register[0x3]));
         physical_cores = ((std::uint32_t)(cpu::cores_register[0x2] & 0xff)) + 0x1;
     }
 
@@ -339,11 +339,11 @@ auto cpu::read_HW_tick_from_name(double * time) -> bool {
  */
 auto cpu::instruction_set_checker() -> void {
 #if defined(X86)
-    __asm__("mov $0x1, %eax\n\t");
-    __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (cpu::instruction_detection[0x2]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::instruction_detection[0x0]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::instruction_detection[0x1]));
+    __asm__ __volatile__ ("mov $0x1, %eax\n\t");
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::instruction_detection[0x2]));
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::instruction_detection[0x0]));
+    __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::instruction_detection[0x1]));
 
     instruction_set::instructions["SSE3"] = (cpu::instruction_detection[0x0] & (0x1 << 0x0)) != 0x0;
     instruction_set::instructions["PCLMUL"] = (cpu::instruction_detection[0x0] & (0x1 << 0x1)) != 0x0;
@@ -532,17 +532,17 @@ auto cpu::print_thermal_state() -> std::string {
 auto cpu::model_name(std::uint32_t eax_values) -> void {
 #if defined(X86)
     switch (eax_values) {
-        case 0x1: __asm__("mov $0x80000002, %eax\n\t"); break;
-        case 0x2: __asm__("mov $0x80000003, %eax\n\t"); break;
-        case 0x3: __asm__("mov $0x80000004, %eax\n\t"); break;
+        case 0x1: __asm__ __volatile__ ("mov $0x80000002, %eax\n\t"); break;
+        case 0x2: __asm__ __volatile__ ("mov $0x80000003, %eax\n\t"); break;
+        case 0x3: __asm__ __volatile__ ("mov $0x80000004, %eax\n\t"); break;
         default: std::cout << "Something went wrong" << std::endl; break;
     }
 
-    __asm__("cpuid\n\t");
-    __asm__("mov %%eax, %0\n\t":"=r" (cpu::register_output[0x0]));
-    __asm__("mov %%ebx, %0\n\t":"=r" (cpu::register_output[0x1]));
-    __asm__("mov %%ecx, %0\n\t":"=r" (cpu::register_output[0x2]));
-    __asm__("mov %%edx, %0\n\t":"=r" (cpu::register_output[0x3]));
+    __asm__ __volatile__ ("cpuid\n\t");
+    __asm__ __volatile__ ("mov %%eax, %0\n\t":"=r" (cpu::register_output[0x0]));
+    __asm__ __volatile__ ("mov %%ebx, %0\n\t":"=r" (cpu::register_output[0x1]));
+    __asm__ __volatile__ ("mov %%ecx, %0\n\t":"=r" (cpu::register_output[0x2]));
+    __asm__ __volatile__ ("mov %%edx, %0\n\t":"=r" (cpu::register_output[0x3]));
 
     std::cout << std::string{ (const char *)&cpu::register_output[0x0] };
 
@@ -572,10 +572,10 @@ auto cpu::model_name(std::uint32_t eax_values) -> void {
  */
 [[maybe_unused]] auto cpu::get_cpu_id() -> void {
 #if defined(X86)
-    __asm__("xor %eax, %eax\n\t");
-    __asm__("xor %ebx, %ebx\n\t");
-    __asm__("xor %ecx, %ecx\n\t");
-    __asm__("xor %edx, %edx\n\t");
+    __asm__ __volatile__ ("xor %eax, %eax\n\t");
+    __asm__ __volatile__ ("xor %ebx, %ebx\n\t");
+    __asm__ __volatile__ ("xor %ecx, %ecx\n\t");
+    __asm__ __volatile__ ("xor %edx, %edx\n\t");
 
     for (std::uint32_t values { 0x1 }; values <= 0x3; ++values) cpu::model_name(values);
 #endif
