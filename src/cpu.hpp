@@ -28,25 +28,22 @@ public:
     static inline std::uint32_t register_output[0xA];
     static inline std::uint32_t instruction_detection[0x3];
 
-    [[maybe_unused]] static auto get_cpu_id() -> void;
-
-    [[maybe_unused]] static auto get_both_cores() -> void;
     static auto vendor_id() -> std::string;
-
-    [[maybe_unused]] static auto print_instructions() -> void;
     static auto measure_TSC_tick() -> double;
     static auto supports_invariantTSC() -> bool;
     static auto cpu_percentage() -> std::string;
     static auto instruction_set_checker() -> void;
     static auto print_thermal_state() -> std::string;
+    [[maybe_unused]] static auto get_cpu_id() -> void;
     static auto extract_leaf_15H(double * time) -> bool;
+    [[maybe_unused]] static auto get_both_cores() -> void;
     [[maybe_unused]] static auto get_cache_info() -> void;
     static inline auto read_cycle_count()-> std::uint64_t;
-
-    [[maybe_unused]] static auto measure_clock_granularity() -> std::uint64_t;
     static auto model_name(std::uint32_t eax_values) -> void;
+    [[maybe_unused]] static auto print_instructions() -> void;
     static auto read_HW_tick_from_name(double * time) -> bool;
     [[maybe_unused]] static auto read_HW_tick_time() -> double;
+    [[maybe_unused]] static auto measure_clock_granularity() -> std::uint64_t;
     static auto format_SI(double interval, int width, char unit) -> std::string;
     [[maybe_unused]] [[noreturn]] static auto fatal_error(char const * Format, ...) -> void;
 };
