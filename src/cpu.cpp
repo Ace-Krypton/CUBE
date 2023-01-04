@@ -3,12 +3,6 @@
  * See LICENSE file for license details
  */
 
-/**
- * TODO List
- * 1. Sockets
- * 2. L1 and L2 cache size using CPUID
- */
-
 #include <iostream>
 #include <chrono>
 #include <thread>

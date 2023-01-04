@@ -47,4 +47,5 @@ public:
     static auto format_SI(double interval, int width, char unit) -> std::string;
     [[maybe_unused]] [[noreturn]] static auto fatal_error(char const * Format, ...) -> void;
 };
+
 #endif //CUBE_CPU_HPP

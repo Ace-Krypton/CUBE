@@ -10,6 +10,11 @@
 #include "cpu.hpp"
 #include "tui.hpp"
 
+/**
+ * \brief Prints the "|" according to percentage argument
+ * @param percent Percentage value
+ * @return final std::string as "|"
+ */
 auto tui::progress_bar(const std::string& percent) -> std::string {
     std::string result = "CPU [";
     int _size = 0x32;
@@ -25,6 +30,10 @@ auto tui::progress_bar(const std::string& percent) -> std::string {
     return result;
 }
 
+/**
+ * \brief Does the writing part to console
+ * @param win Takes WINDOW object instance
+ */
 auto tui::write_console(WINDOW * win) -> void {
     wattron(win, A_BOLD);
     wattron(win, COLOR_PAIR(0x1));
@@ -33,6 +42,10 @@ auto tui::write_console(WINDOW * win) -> void {
     mvwprintw(win, 0x1, 0xF, "%s", (cpu::print_thermal_state()).c_str());
 }
 
+/**
+ * \brief Endless while loop for updating value and printing it to the screen
+ *      Exits when user presses "CTRL+C" or whatever the binding is
+ */
 [[noreturn]] auto tui::draw() -> void {
     start_color();
     int xMax;
