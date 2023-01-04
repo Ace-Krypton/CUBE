@@ -20,12 +20,12 @@
     std::string line;
     std::getline(uptime_file, line);
     std::istringstream iss(line);
-    uint64_t uptime_seconds;
+    std::uint64_t uptime_seconds;
     iss >> uptime_seconds;
 
-    uint64_t hours = uptime_seconds / 3600;
-    uint64_t minutes = (uptime_seconds / 60) % 60;
-    uint64_t seconds = uptime_seconds % 60;
+    std::uint64_t hours = uptime_seconds / 3600;
+    std::uint64_t minutes = (uptime_seconds / 60) % 60;
+    std::uint64_t seconds = uptime_seconds % 60;
 
     std::cout << std::setw(2) << std::setfill('0') << hours << ":"
               << std::setw(2) << std::setfill('0') << minutes << ":"

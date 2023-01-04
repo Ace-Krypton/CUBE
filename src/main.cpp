@@ -8,12 +8,12 @@
 
 auto main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) -> int {
     /*  ------------------------------------  Tests  ------------------------------------  */
+
     initscr();
     noecho();
     cbreak();
     setlocale(LC_ALL, "");
     endwin();
-
     /*std::cout << "-------------------------------------------------------------------------" << std::endl;
     bool invariant = cpu::supports_invariantTSC();
 
@@ -69,6 +69,5 @@ auto main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) -> int
     std::cout << physmem_total() << std::endl;
     std::cout << physmem_available() << std::endl;
     std::cout << "-------------------------------------------------------------------------" << std::endl;*/
-
     return 0x0;
 }
